@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Boundaries · Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f0f2f8;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 80px;
+  color: #1e293b;
+}
+
+/* ── Card ──────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 620px;
+  overflow: hidden;
+  animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Progress ───────────────────────────────────── */
+.progress-track {
+  height: 3px;
+  background: #e8eaf0;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Step header ────────────────────────────────── */
+.step-meta {
+  padding: 26px 32px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.step-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.step-of {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.step-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #0f172a;
+  padding: 10px 32px 0;
+  letter-spacing: -0.3px;
+}
+.step-sub {
+  font-size: 13.5px;
+  color: #64748b;
+  padding: 6px 32px 0;
+  line-height: 1.6;
+}
+
+/* ── Buttons ────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-decoration: none;
+}
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #4f46e5; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { background: #f1f5f9; color: #475569; }
+.btn-ghost:hover { background: #e2e8f0; }
+.btn-outline { background: #fff; color: #6366f1; border: 1.5px solid #c7d2fe; }
+.btn-outline:hover { background: #eef2ff; }
+
+/* ── Step footer ─────────────────────────────────── */
+.step-footer {
+  padding: 18px 32px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ────────────────────────────────────────────────── */
+/* STEP 1 — Welcome                                   */
+/* ────────────────────────────────────────────────── */
+.welcome-body { padding: 24px 32px 32px; }
+
+.axes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.axis-card {
+  border: 1px solid #e8eaf0;
+  border-radius: 10px;
+  padding: 14px;
+}
+.axis-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.axis-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.axis-bar {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, #cbd5e1, #6366f1);
+  border-radius: 2px;
+  position: relative;
+}
+.axis-bar::after {
+  content: '';
+  position: absolute;
+  right: -4px; top: -3px;
+  border: 4px solid transparent;
+  border-left-color: #6366f1;
+}
+.axis-note {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 5px;
+}
+
+.quadrant-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+.qp-cell {
+  border-radius: 9px;
+  padding: 11px 13px;
+  border: 1px solid;
+}
+.qp-role { font-size: 12px; font-weight: 700; }
+.qp-desc { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+.qp-pa { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+.qp-pp { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
+.qp-xa { background:#f5f3ff; border-color:#ddd6fe; color:#6d28d9; }
+.qp-xp { background:#fffbeb; border-color:#fde68a; color:#b45309; }
+
+.domain-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 22px;
+}
+.dpill {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 20px;
+}
+.dpill.pro { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+.dpill.per { background:#f5f3ff; color:#7c3aed; border:1px solid #ddd6fe; }
+.dpill.add { background:#f8fafc; color:#94a3b8; border:1px dashed #e2e8f0; }
+
+.info-box {
+  background: #f8fafc;
+  border-radius: 9px;
+  padding: 13px 15px;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+.info-box strong { color: #475569; }
+
+/* ────────────────────────────────────────────────── */
+/* STEP 2 — Plot                                      */
+/* ────────────────────────────────────────────────── */
+.plot-body { padding: 20px 32px 0; }
+
+.plot-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 14px;
+  min-height: 20px;
+  transition: color 0.2s;
+}
+.plot-hint.active-hint { color: #6366f1; font-weight: 500; }
+
+.plot-wrap {
+  position: relative;
+  width: 505px;
+  height: 500px;
+  margin: 0 auto;
+  user-select: none;
+}
+.plot-wrap svg {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+}
+.chips-layer {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Placed chips */
+.chip-placed {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px 0 9px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  pointer-events: auto;
+  white-space: nowrap;
+  border: 1.5px solid;
+  transition: box-shadow 0.15s, transform 0.1s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.chip-placed:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+.chip-placed.selected-chip {
+  box-shadow: 0 0 0 3px #6366f1, 0 3px 10px rgba(99,102,241,0.25);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+.chip-pct { font-size: 9.5px; opacity: 0.65; }
+.chip-x {
+  font-size: 9px;
+  opacity: 0.45;
+  cursor: pointer;
+  padding: 1px 2px;
+  border-radius: 3px;
+}
+.chip-x:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+
+/* Quadrant chip colors */
+.cq-pa { background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; }
+.cq-pp { background:#f0fdf4; border-color:#6ee7b7; color:#065f46; }
+.cq-xa { background:#f5f3ff; border-color:#c4b5fd; color:#5b21b6; }
+.cq-xp { background:#fffbeb; border-color:#fcd34d; color:#92400e; }
+
+/* Hover preview dot */
+.preview-dot {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.7);
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #6366f1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+.preview-label {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  background: #1e293b;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.preview-label::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1e293b;
+}
+
+/* ── Tray ────────────────────────────────────────── */
+.tray-section { padding: 14px 32px 0; }
+.tray-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-height: 46px;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1.5px dashed #e2e8f0;
+  border-radius: 10px;
+}
+.tray-empty { font-size: 11.5px; color: #94a3b8; font-style: italic; align-self: center; }
+.chip-tray {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid;
+  white-space: nowrap;
+  transition: all 0.15s;
+  background: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.chip-tray:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+.chip-tray.selected-chip {
+  background: #eef2ff;
+  border-color: #818cf8;
+  color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+}
+.chip-tray.pro { border-color: #93c5fd; color: #1d4ed8; }
+.chip-tray.per { border-color: #c4b5fd; color: #5b21b6; }
+.chip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chip-tray.pro .chip-dot { background: #3b82f6; }
+.chip-tray.per .chip-dot { background: #8b5cf6; }
+
+/* ── Add domain ─────────────────────────────────── */
+.add-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 32px 20px;
+}
+.add-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.15s;
+  background: white;
+}
+.add-row input:focus { border-color: #818cf8; }
+.add-row input.error { border-color: #f87171; }
+
+.mapped-count { font-size: 12.5px; color: #64748b; }
+.mapped-count strong { color: #1e293b; }
+
+/* ────────────────────────────────────────────────── */
+/* STEP 3 — Preview                                   */
+/* ────────────────────────────────────────────────── */
+.preview-body { padding: 22px 32px 32px; }
+
+.q-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.q-card {
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid;
+}
+.q-card-title { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.q-card-role  { font-size: 10.5px; opacity: 0.65; margin: 3px 0 10px; }
+.q-card-items { display: flex; flex-direction: column; gap: 4px; }
+.q-card-item  {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 6px;
+}
+.q-card-pct { font-weight: 700; opacity: 0.8; }
+.q-card-empty { font-size: 11px; opacity: 0.45; font-style: italic; }
+.q-card.qc-pa { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+.q-card.qc-pp { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
+.q-card.qc-xa { background:#f5f3ff; border-color:#ddd6fe; color:#6d28d9; }
+.q-card.qc-xp { background:#fffbeb; border-color:#fde68a; color:#b45309; }
+
+.md-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.md-pre {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-radius: 10px;
+  padding: 18px 20px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 320px;
+  white-space: pre;
+}
+.md-pre .c-head  { color: #818cf8; font-weight: 700; }
+.md-pre .c-sub   { color: #7dd3fc; }
+.md-pre .c-em    { color: #a5f3fc; }
+.md-pre .c-muted { color: #475569; }
+.md-pre .c-green { color: #6ee7b7; }
+.md-pre .c-key   { color: #fbbf24; }
+
+.export-btns { display: flex; gap: 8px; }
+
+/* ── Utility ─────────────────────────────────────── */
+.plot-cursor-crosshair { cursor: crosshair !important; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// Constants
+// ═══════════════════════════════════════════════════
+const PL = 80, PT = 45, PR = 25, PB = 55;
+const CW = 400, CH = 400;
+const SW = PL + CW + PR;  // 505
+const SH = PT + CH + PB;  // 500
+
+const CX = PL + CW / 2;   // center x px = 280
+const CY = PT + CH / 2;   // center y px = 245
+
+function n2p(nx, ny) {
+  return { x: PL + (nx + 1) / 2 * CW, y: PT + (1 - ny) / 2 * CH };
+}
+function p2n(px, py) {
+  return {
+    nx: Math.max(-1, Math.min(1, (px - PL) / CW * 2 - 1)),
+    ny: Math.max(-1, Math.min(1, 1 - (py - PT) / CH * 2))
+  };
+}
+function intensity(nx, ny) {
+  return Math.round(Math.sqrt(nx * nx + ny * ny) / Math.sqrt(2) * 100);
+}
+function quadrant(nx, ny) {
+  return (nx <= 0 ? 'pro' : 'per') + '-' + (ny >= 0 ? 'a' : 'p');
+}
+
+const Q_INFO = {
+  'pro-a': { label: 'Professional · Active', role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
+  'pro-p': { label: 'Professional · Passive',role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
+  'per-a': { label: 'Personal · Active',     role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
+  'per-p': { label: 'Personal · Passive',    role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
+};
+const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
+
+// ═══════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════
+const PRESETS = [
+  { id:'career-planning',       name:'Career Planning',      cat:'pro' },
+  { id:'email-drafting',        name:'Email Drafting',       cat:'pro' },
+  { id:'hiring',                name:'Hiring',               cat:'pro' },
+  { id:'coding',                name:'Coding',               cat:'pro' },
+  { id:'experimental-design',   name:'Experimental Design',  cat:'pro' },
+  { id:'mental-health',         name:'Mental Health',        cat:'per' },
+  { id:'relationship-advice',   name:'Relationship Advice',  cat:'per' },
+  { id:'communication',         name:'Communication Skills', cat:'per' },
+];
+
+let state = {
+  step: 1,
+  domains: PRESETS.map(d => ({ ...d, x: null, y: null, custom: false })),
+  selectedId: null,
+  hoverPos: null,   // { x, y } pixel, when domain selected and mouse over plot
+};
+
+// ═══════════════════════════════════════════════════
+// Markdown
+// ═══════════════════════════════════════════════════
+function genMarkdown() {
+  const date = new Date().toISOString().split('T')[0];
+  const placed   = state.domains.filter(d => d.x !== null);
+  const unplaced = state.domains.filter(d => d.x === null);
+
+  const byQ = {};
+  Q_ORDER.forEach(q => { byQ[q] = []; });
+  placed.forEach(d => {
+    const q = quadrant(d.x, d.y);
+    if (byQ[q]) byQ[q].push(d);
+  });
+  Q_ORDER.forEach(q => byQ[q].sort((a,b) => intensity(b.x,b.y) - intensity(a.x,a.y)));
+
+  const roleDescs = {
+    'pro-a': 'AI gives concrete, actionable recommendations on work tasks.',
+    'pro-p': 'AI surfaces information and options — final decisions are yours.',
+    'per-a': 'AI offers concrete personal guidance — engage intentionally.',
+    'per-p': 'AI reflects insights gently — final interpretation is yours.',
+  };
+
+  let md = `# AI Involvement Boundaries\n\n`;
+  md += `> _Last updated: ${date}_\n\n`;
+  md += `This file defines how you want AI to engage across different life domains.\n`;
+  md += `Place it in your workspace root and reference it to set session context.\n\n`;
+  md += `---\n\n`;
+  md += `## Axis Reference\n\n`;
+  md += `| Axis | ← Low | High → |\n`;
+  md += `|------|-------|--------|\n`;
+  md += `| Horizontal | Professional | Personal |\n`;
+  md += `| Vertical | Passive — surface-level | Active — actionable |\n\n`;
+  md += `**Intensity** = distance from center (0% = no AI involvement, 100% = fully engaged)\n\n`;
+  md += `---\n\n`;
+
+  const hasPlaced = placed.length > 0;
+  Q_ORDER.forEach(q => {
+    const info = Q_INFO[q];
+    const doms = byQ[q];
+    if (!doms.length) return;
+    md += `## ${info.label}  *(${info.role})*\n\n`;
+    md += `> ${roleDescs[q]}\n\n`;
+    doms.forEach(d => {
+      md += `- **${d.name}** — ${intensity(d.x, d.y)}% involvement\n`;
+    });
+    md += `\n---\n\n`;
+  });
+
+  if (!hasPlaced) { md += `## No domains mapped yet.\n\n---\n\n`; }
+
+  if (unplaced.length > 0) {
+    md += `## No AI Involvement\n\n`;
+    md += `These domains were not mapped — AI defaults to 0% engagement:\n\n`;
+    unplaced.forEach(d => { md += `- ${d.name}\n`; });
+    md += `\n---\n\n`;
+  }
+
+  md += `## Raw Coordinates\n\n`;
+  md += '```json\n';
+  const raw = {
+    version: 1,
+    generated: date,
+    axes: {
+      x: { description: 'horizontal', min: 'professional (-1)', max: 'personal (+1)' },
+      y: { description: 'vertical',   min: 'passive (-1)',      max: 'active (+1)'   }
+    },
+    domains: state.domains.map(d => ({
+      name:      d.name,
+      category:  d.cat === 'pro' ? 'professional' : 'personal',
+      custom:    d.custom,
+      x:         d.x !== null ? Math.round(d.x * 100) / 100 : 0,
+      y:         d.y !== null ? Math.round(d.y * 100) / 100 : 0,
+      quadrant:  d.x !== null ? Q_INFO[quadrant(d.x, d.y)].label : 'unmapped',
+      intensity: d.x !== null ? intensity(d.x, d.y) / 100 : 0,
+    }))
+  };
+  md += JSON.stringify(raw, null, 2);
+  md += '\n```\n';
+  return md;
+}
+
+// ═══════════════════════════════════════════════════
+// SVG Plot
+// ═══════════════════════════════════════════════════
+function makeSVG() {
+  const r = CW / 2;
+  const maxR = r * Math.sqrt(2);
+  const r25 = maxR * 0.25, r50 = maxR * 0.5, r75 = maxR * 0.75;
+  const rt = PL + CW, rb = PT + CH;
+
+  const inChartClip = (x, y) =>
+    x >= PL && x <= rt && y >= PT && y <= rb;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${SW}" height="${SH}">
+  <defs>
+    <clipPath id="cc">
+      <rect x="${PL}" y="${PT}" width="${CW}" height="${CH}"/>
+    </clipPath>
+  </defs>
+
+  <!-- Quadrant fills -->
+  <rect x="${PL}"  y="${PT}"  width="${CW/2}" height="${CH/2}" fill="#eff6ff" opacity="0.55"/>
+  <rect x="${CX}"  y="${PT}"  width="${CW/2}" height="${CH/2}" fill="#f5f3ff" opacity="0.55"/>
+  <rect x="${PL}"  y="${CY}"  width="${CW/2}" height="${CH/2}" fill="#f0fdf4" opacity="0.55"/>
+  <rect x="${CX}"  y="${CY}"  width="${CW/2}" height="${CH/2}" fill="#fffbeb" opacity="0.55"/>
+
+  <!-- Intensity rings (clipped) -->
+  <g clip-path="url(#cc)" opacity="0.15">
+    <circle cx="${CX}" cy="${CY}" r="${r75}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 3"/>
+    <circle cx="${CX}" cy="${CY}" r="${r50}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 3"/>
+    <circle cx="${CX}" cy="${CY}" r="${r25}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 3"/>
+  </g>
+
+  <!-- Ring labels (diagonal — stays within chart) -->
+  <g font-size="8.5" fill="#c0c8d8" font-family="Inter,system-ui" clip-path="url(#cc)">
+    <text x="${CX + r25*0.707 + 3}" y="${CY - r25*0.707 - 3}">25%</text>
+    <text x="${CX + r50*0.707 + 3}" y="${CY - r50*0.707 - 3}">50%</text>
+    <text x="${CX + r75*0.707 + 3}" y="${CY - r75*0.707 - 3}">75%</text>
+  </g>
+
+  <!-- Axes -->
+  <line x1="${PL}" y1="${CY}" x2="${rt}" y2="${CY}" stroke="#d1d5db" stroke-width="1.5"/>
+  <line x1="${CX}" y1="${PT}" x2="${CX}" y2="${rb}" stroke="#d1d5db" stroke-width="1.5"/>
+
+  <!-- Chart border -->
+  <rect x="${PL}" y="${PT}" width="${CW}" height="${CH}" fill="none" stroke="#e2e8f0" stroke-width="1.5" rx="2"/>
+
+  <!-- Center dot -->
+  <circle cx="${CX}" cy="${CY}" r="3.5" fill="#e2e8f0"/>
+
+  <!-- Axis labels -->
+  <text x="${PL - 10}" y="${CY}" text-anchor="end"   dominant-baseline="middle"
+    font-size="12" font-weight="700" fill="#3b82f6" font-family="Inter,system-ui">Professional</text>
+  <text x="${rt + 10}"  y="${CY}" text-anchor="start" dominant-baseline="middle"
+    font-size="12" font-weight="700" fill="#8b5cf6" font-family="Inter,system-ui">Personal</text>
+  <text x="${CX}" y="${PT - 14}" text-anchor="middle"
+    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Active</text>
+  <text x="${CX}" y="${PT - 26}" text-anchor="middle"
+    font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(actionable)</text>
+  <text x="${CX}" y="${rb + 18}" text-anchor="middle" dominant-baseline="hanging"
+    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Passive</text>
+  <text x="${CX}" y="${rb + 32}" text-anchor="middle" dominant-baseline="hanging"
+    font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(surface-level)</text>
+
+  <!-- Quadrant role labels -->
+  <text x="${PL + 8}"   y="${PT + 15}" font-size="10.5" font-weight="600" fill="#3b82f6" opacity="0.65" font-family="Inter,system-ui">Co-pilot</text>
+  <text x="${rt - 8}"   y="${PT + 15}" font-size="10.5" font-weight="600" fill="#7c3aed" opacity="0.65" text-anchor="end" font-family="Inter,system-ui">Coach</text>
+  <text x="${PL + 8}"   y="${rb - 8}"  font-size="10.5" font-weight="600" fill="#15803d" opacity="0.65" font-family="Inter,system-ui">Researcher</text>
+  <text x="${rt - 8}"   y="${rb - 8}"  font-size="10.5" font-weight="600" fill="#b45309" opacity="0.65" text-anchor="end" font-family="Inter,system-ui">Mirror</text>
+</svg>`;
+}
+
+// ═══════════════════════════════════════════════════
+// Render
+// ═══════════════════════════════════════════════════
+function render() {
+  const app = document.getElementById('app');
+  if (state.step === 1) app.innerHTML = renderStep1();
+  else if (state.step === 2) { app.innerHTML = renderStep2(); bindPlot(); }
+  else app.innerHTML = renderStep3();
+}
+
+// ── Step 1 ───────────────────────────────────────
+function renderStep1() {
+  const pros = state.domains.filter(d => !d.custom && d.cat === 'pro');
+  const pers = state.domains.filter(d => !d.custom && d.cat === 'per');
+  return `
+<div class="card">
+  <div class="progress-track"><div class="progress-fill" style="width:33%"></div></div>
+  <div class="step-meta">
+    <span class="step-badge">Setup</span>
+    <span class="step-of">Step 1 of 3</span>
+  </div>
+  <h1 class="step-title">Set Your AI Boundaries</h1>
+  <p class="step-sub">Define how—and how much—AI engages across different areas of your life. Your choices are saved to a <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px">memory.md</code> file you can reference in any session.</p>
+
+  <div class="welcome-body">
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:10px">The two axes</div>
+    <div class="axes-grid">
+      <div class="axis-card">
+        <div class="axis-card-label">Horizontal</div>
+        <div class="axis-range">
+          <span style="color:#3b82f6">Professional</span>
+          <div class="axis-bar"></div>
+          <span style="color:#8b5cf6">Personal</span>
+        </div>
+        <div class="axis-note">Work tasks vs. personal life domains</div>
+      </div>
+      <div class="axis-card">
+        <div class="axis-card-label">Vertical</div>
+        <div class="axis-range">
+          <span style="color:#94a3b8">Passive</span>
+          <div class="axis-bar"></div>
+          <span style="color:#334155">Active</span>
+        </div>
+        <div class="axis-note">Passive = surfaces info &nbsp;·&nbsp; Active = gives recommendations</div>
+      </div>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:10px">What each quadrant means</div>
+    <div class="quadrant-preview" style="margin-bottom:22px">
+      <div class="qp-cell qp-pa">
+        <div class="qp-role">Co-pilot</div>
+        <div class="qp-desc">Professional · Active<br>Concrete work recommendations</div>
+      </div>
+      <div class="qp-cell qp-xa">
+        <div class="qp-role">Coach</div>
+        <div class="qp-desc">Personal · Active<br>Concrete personal guidance</div>
+      </div>
+      <div class="qp-cell qp-pp">
+        <div class="qp-role">Researcher</div>
+        <div class="qp-desc">Professional · Passive<br>Surfaces options, you decide</div>
+      </div>
+      <div class="qp-cell qp-xp">
+        <div class="qp-role">Mirror</div>
+        <div class="qp-desc">Personal · Passive<br>Gentle reflection, light touch</div>
+      </div>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:10px">You'll map these domains</div>
+    <div class="domain-pills">
+      ${pros.map(d => `<span class="dpill pro">${d.name}</span>`).join('')}
+      ${pers.map(d => `<span class="dpill per">${d.name}</span>`).join('')}
+      <span class="dpill add">+ add your own</span>
+    </div>
+
+    <div class="info-box">
+      <strong>How intensity works:</strong> the further from center you place a domain, the more involved AI is. 
+      A domain at the center = 0% involvement. A corner = ~100%. 
+      The quadrant shapes <em>how</em> AI engages; the distance shapes <em>how much</em>.
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px"
+      onclick="goTo(2)">Begin Setup →</button>
+  </div>
+</div>`;
+}
+
+// ── Step 2 ───────────────────────────────────────
+function renderStep2() {
+  const placed   = state.domains.filter(d => d.x !== null);
+  const unplaced = state.domains.filter(d => d.x === null);
+  const sel      = state.selectedId;
+  const selDom   = sel ? state.domains.find(d => d.id === sel) : null;
+
+  const hint = selDom
+    ? `Placing: <strong>${selDom.name}</strong> — click anywhere on the grid`
+    : placed.length > 0
+      ? `Click a domain chip below to select it, then click the grid to place it`
+      : `Select a domain chip below, then click the grid to place it`;
+
+  const placedChips = placed.map(d => {
+    const { x: px, y: py } = n2p(d.x, d.y);
+    const q  = quadrant(d.x, d.y);
+    const it = intensity(d.x, d.y);
+    const qcss = Q_INFO[q].chipCss;
+    const isSelected = sel === d.id;
+    return `<div class="chip-placed ${qcss}${isSelected ? ' selected-chip' : ''}"
+      style="left:${px}px;top:${py}px"
+      data-id="${d.id}"
+      onclick="selectDomain('${d.id}', event)">
+      <span>${d.name}</span>
+      <span class="chip-pct">${it}%</span>
+      <span class="chip-x" onclick="unplace('${d.id}',event)" title="Remove from map">✕</span>
+    </div>`;
+  }).join('');
+
+  const trayChips = unplaced.length > 0
+    ? unplaced.map(d => {
+        const isSelected = sel === d.id;
+        return `<div class="chip-tray ${d.cat}${isSelected ? ' selected-chip' : ''}"
+          data-id="${d.id}"
+          onclick="selectDomain('${d.id}', event)">
+          <span class="chip-dot"></span>${d.name}
+        </div>`;
+      }).join('')
+    : `<span class="tray-empty">All domains are on the map ✓</span>`;
+
+  return `
+<div class="card" style="max-width:620px">
+  <div class="progress-track"><div class="progress-fill" style="width:66%"></div></div>
+  <div class="step-meta">
+    <span class="step-badge">Mapping</span>
+    <span class="step-of">Step 2 of 3</span>
+  </div>
+  <h1 class="step-title">Map Your Domains</h1>
+  <p class="step-sub">Select a domain, then click the grid to place it. Position = the AI's role. Distance from center = how involved AI is.</p>
+
+  <div class="plot-body">
+    <div class="plot-hint${selDom ? ' active-hint' : ''}" id="plot-hint">${hint}</div>
+    <div class="plot-wrap${selDom ? ' plot-cursor-crosshair' : ''}" id="plot-wrap">
+      ${makeSVG()}
+      <div class="chips-layer" id="chips-layer">
+        ${placedChips}
+      </div>
+      <div id="hover-preview" style="display:none;pointer-events:none;position:absolute;top:0;left:0;width:100%;height:100%"></div>
+    </div>
+  </div>
+
+  <div class="tray-section">
+    <div class="tray-label">${unplaced.length > 0 ? 'Unplaced domains' : 'All placed'}</div>
+    <div class="tray" id="tray">${trayChips}</div>
+  </div>
+
+  <div class="add-row">
+    <input type="text" id="new-domain-input" placeholder="Add a custom domain…"
+      maxlength="40" onkeydown="if(event.key==='Enter')addCustom()"/>
+    <button class="btn btn-ghost" onclick="addCustom()">Add</button>
+  </div>
+
+  <div class="step-footer">
+    <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
+    <span class="mapped-count"><strong>${placed.length}</strong> of ${state.domains.length} mapped</span>
+    <button class="btn btn-primary" onclick="goTo(3)"
+      ${placed.length === 0 ? 'disabled' : ''}>Preview →</button>
+  </div>
+</div>`;
+}
+
+function bindPlot() {
+  const wrap = document.getElementById('plot-wrap');
+  if (!wrap) return;
+
+  wrap.addEventListener('click', function(e) {
+    if (!state.selectedId) return;
+    const rect = wrap.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    if (px >= PL && px <= PL + CW && py >= PT && py <= PT + CH) {
+      const { nx, ny } = p2n(px, py);
+      const dom = state.domains.find(d => d.id === state.selectedId);
+      if (dom) { dom.x = nx; dom.y = ny; }
+      state.selectedId = null;
+      state.hoverPos = null;
+      render();
+    }
+  });
+
+  wrap.addEventListener('mousemove', function(e) {
+    if (!state.selectedId) return;
+    const rect = wrap.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const inside = px >= PL && px <= PL + CW && py >= PT && py <= PT + CH;
+    const preview = document.getElementById('hover-preview');
+    if (!preview) return;
+    if (inside) {
+      const selDom = state.domains.find(d => d.id === state.selectedId);
+      const label  = selDom ? selDom.name : '';
+      preview.style.display = 'block';
+      preview.innerHTML = `
+        <div class="preview-dot" style="left:${px}px;top:${py}px"></div>
+        <div class="preview-label" style="left:${px}px;top:${py}px">${label}</div>`;
+    } else {
+      preview.style.display = 'none';
+      preview.innerHTML = '';
+    }
+  });
+
+  wrap.addEventListener('mouseleave', function() {
+    const preview = document.getElementById('hover-preview');
+    if (preview) { preview.style.display = 'none'; preview.innerHTML = ''; }
+  });
+}
+
+// ── Step 3 ───────────────────────────────────────
+function renderStep3() {
+  const placed = state.domains.filter(d => d.x !== null);
+  const byQ = {};
+  Q_ORDER.forEach(q => { byQ[q] = []; });
+  placed.forEach(d => { const q = quadrant(d.x, d.y); if (byQ[q]) byQ[q].push(d); });
+  Q_ORDER.forEach(q => byQ[q].sort((a,b) => intensity(b.x,b.y) - intensity(a.x,a.y)));
+
+  const qCards = Q_ORDER.map(q => {
+    const info = Q_INFO[q];
+    const doms = byQ[q];
+    return `<div class="q-card ${info.css}">
+      <div class="q-card-title">${info.label}</div>
+      <div class="q-card-role">${info.role} · ${info.desc}</div>
+      <div class="q-card-items">
+        ${doms.length > 0
+          ? doms.map(d => `<div class="q-card-item">
+              <span>${d.name}</span>
+              <span class="q-card-pct">${intensity(d.x,d.y)}%</span>
+            </div>`).join('')
+          : `<span class="q-card-empty">No domains here</span>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  const md = genMarkdown();
+
+  return `
+<div class="card">
+  <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  <div class="step-meta">
+    <span class="step-badge">Done</span>
+    <span class="step-of">Step 3 of 3</span>
+  </div>
+  <h1 class="step-title">Your AI Boundary Map</h1>
+  <p class="step-sub">Review your settings below, then download <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px">memory.md</code> and place it in your workspace root to set context for AI sessions.</p>
+
+  <div class="preview-body">
+    <div class="q-cards">${qCards}</div>
+
+    <div class="md-section-label">memory.md preview</div>
+    <pre class="md-pre" id="md-pre">${syntaxHL(escH(md))}</pre>
+  </div>
+
+  <div class="step-footer">
+    <button class="btn btn-ghost" onclick="goTo(2)">← Edit</button>
+    <div class="export-btns">
+      <button class="btn btn-outline" id="copy-btn" onclick="copyMd()">Copy</button>
+      <button class="btn btn-primary" onclick="downloadMd()">Download memory.md</button>
+    </div>
+  </div>
+</div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// Actions
+// ═══════════════════════════════════════════════════
+function goTo(n) {
+  state.step = n;
+  state.selectedId = null;
+  state.hoverPos = null;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectDomain(id, e) {
+  if (e) e.stopPropagation();
+  state.selectedId = state.selectedId === id ? null : id;
+  render();
+}
+
+function unplace(id, e) {
+  if (e) e.stopPropagation();
+  const dom = state.domains.find(d => d.id === id);
+  if (dom) { dom.x = null; dom.y = null; }
+  if (state.selectedId === id) state.selectedId = null;
+  render();
+}
+
+function addCustom() {
+  const inp = document.getElementById('new-domain-input');
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (!name) return;
+  if (state.domains.some(d => d.name.toLowerCase() === name.toLowerCase())) {
+    inp.classList.add('error');
+    setTimeout(() => inp.classList.remove('error'), 900);
+    return;
+  }
+  state.domains.push({ id: 'c-' + Date.now(), name, cat: 'pro', x: null, y: null, custom: true });
+  inp.value = '';
+  render();
+}
+
+function copyMd() {
+  navigator.clipboard.writeText(genMarkdown()).then(() => {
+    const btn = document.getElementById('copy-btn');
+    if (btn) { btn.textContent = 'Copied ✓'; setTimeout(() => btn.textContent = 'Copy', 1800); }
+  });
+}
+
+function downloadMd() {
+  const blob = new Blob([genMarkdown()], { type: 'text/markdown' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: 'memory.md' });
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════
+// Syntax highlighting for markdown preview
+// ═══════════════════════════════════════════════════
+function escH(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function syntaxHL(s) {
+  return s
+    .replace(/(^# .+$)/gm,   '<span class="c-head">$1</span>')
+    .replace(/(^## .+$)/gm,  '<span class="c-sub">$1</span>')
+    .replace(/(^> .+$)/gm,   '<span class="c-em">$1</span>')
+    .replace(/(^- \*\*.+?\*\*)/gm, '<span class="c-green">$1</span>')
+    .replace(/(\|.+\|)/g,    '<span class="c-muted">$1</span>')
+    .replace(/"([^"]+)":/g,  '<span class="c-key">"$1"</span>:')
+    .replace(/(---)/g,       '<span class="c-muted">$1</span>');
+}
+
+// ═══════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
