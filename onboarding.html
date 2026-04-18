@@ -451,6 +451,29 @@ body {
   max-height: 320px;
   white-space: pre;
 }
+.md-textarea {
+  display: block;
+  width: 100%;
+  background: #0f172a;
+  color: #cbd5e1;
+  border-radius: 10px;
+  padding: 18px 20px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+  max-height: 320px;
+  white-space: pre;
+  resize: vertical;
+  border: 1.5px solid transparent;
+  outline: none;
+  tab-size: 2;
+  overflow-x: auto;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.md-textarea:focus {
+  border-color: #6366f1;
+}
 .md-pre .c-head  { color: #818cf8; font-weight: 700; }
 .md-pre .c-sub   { color: #7dd3fc; }
 .md-pre .c-em    { color: #a5f3fc; }
@@ -931,8 +954,8 @@ function renderStep3() {
   <div class="preview-body">
     <div class="q-cards">${qCards}</div>
 
-    <div class="md-section-label">memory.md preview</div>
-    <pre class="md-pre" id="md-pre">${syntaxHL(escH(md))}</pre>
+    <div class="md-section-label">memory.md preview <span style="font-weight:400;color:#64748b;font-size:10px;text-transform:none;letter-spacing:0">(editable)</span></div>
+    <textarea class="md-textarea" id="md-textarea" spellcheck="false">${escH(md)}</textarea>
   </div>
 
   <div class="step-footer">
@@ -985,15 +1008,20 @@ function addCustom() {
   render();
 }
 
+function getMdContent() {
+  const ta = document.getElementById('md-textarea');
+  return ta ? ta.value : genMarkdown();
+}
+
 function copyMd() {
-  navigator.clipboard.writeText(genMarkdown()).then(() => {
+  navigator.clipboard.writeText(getMdContent()).then(() => {
     const btn = document.getElementById('copy-btn');
     if (btn) { btn.textContent = 'Copied ✓'; setTimeout(() => btn.textContent = 'Copy', 1800); }
   });
 }
 
 function downloadMd() {
-  const blob = new Blob([genMarkdown()], { type: 'text/markdown' });
+  const blob = new Blob([getMdContent()], { type: 'text/markdown' });
   const url  = URL.createObjectURL(blob);
   const a    = Object.assign(document.createElement('a'), { href: url, download: 'memory.md' });
   a.click();
