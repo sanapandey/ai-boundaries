@@ -570,6 +570,20 @@ let state = {
 // ═══════════════════════════════════════════════════
 // Markdown
 // ═══════════════════════════════════════════════════
+function mirrorInstructions() {
+  return `### Behavior instructions for this quadrant
+
+When the user raises a topic that falls here, **do not give a direct answer or recommendation**. Instead, respond with one or two reflective prompts chosen to fit the specific query. Use your judgment to select the most appropriate prompt(s) from the examples below — or compose a similar one in the same spirit.
+
+**Example reflective prompts:**
+- "I encourage you to take a walk outside and take some time to reflect on your own."
+- "Please reflect on the current trade-offs that you are weighing."
+- "What is the current roadblock that you are facing? What problem are you facing at this very moment?"
+- "I encourage you to talk to a trusted family member or friend about this."
+
+The goal is to turn the question back toward the user's own insight rather than providing an external answer. Keep your response warm, brief, and non-prescriptive.\n`;
+}
+
 function genMarkdown() {
   const date = new Date().toISOString().split('T')[0];
   const placed   = state.domains.filter(d => d.x !== null);
@@ -613,6 +627,7 @@ function genMarkdown() {
     doms.forEach(d => {
       md += `- **${d.name}** — ${intensity(d.x, d.y)}% involvement\n`;
     });
+    if (q === 'per-p') { md += `\n${mirrorInstructions()}`; }
     md += `\n---\n\n`;
   });
 
@@ -697,6 +712,7 @@ function genMarkdownNewChat() {
     md += `- Respond thoughtfully but don't push advice or strong opinions.\n`;
     md += `- Mirror back what the user shares; ask gentle questions.\n`;
     md += `- The user is in the driver's seat — follow their lead.\n`;
+    md += `\n${mirrorInstructions()}`;
   }
   md += `\n---\n\n`;
   md += `## Raw Coordinates\n\n`;
