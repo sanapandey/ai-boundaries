@@ -41,6 +41,38 @@ Then reference it in your AI tool's system prompt:
 See memory.md in the project root for my AI boundary preferences.
 ```
 
+## Chrome Extension
+
+The repo also ships as a Chrome extension that shows your quadrant map in a side panel while you use any AI chat tool.
+
+### Loading the extension
+
+1. Open Chrome and go to `chrome://extensions`
+2. Enable **Developer Mode** using the toggle in the top-right corner
+3. Click **Load unpacked**
+4. Select the `ai-boundaries` folder (the root of this repo)
+5. The extension will appear in your toolbar — click it to open the side panel
+
+### Setting up your map
+
+The side panel reads from the same storage that the onboarding page writes to. For the two to share data, open the onboarding page **through the extension** rather than directly as a file:
+
+1. On the `chrome://extensions` page, find AI Boundaries and click **Details**
+2. Click **Extension options** — this opens `onboarding.html` as an extension page
+3. Complete the three setup steps and place your domains on the map
+4. Your selections are saved automatically to `chrome.storage.sync`
+5. The side panel updates live as you make changes
+
+### Using the side panel
+
+Once your map is set up, open any AI chat (ChatGPT, Claude, Gemini, etc.) and click the AI Boundaries icon in the toolbar. The side panel will show:
+
+- A mini quadrant graph with a dot for each placed domain
+- A list of all active domains with their assigned role and intensity %
+- Your New Chat default (if set), highlighted separately
+
+To update your map at any time, click **Edit setup** in the side panel header.
+
 ## Contributing
 
 Pull requests welcome. The entire app lives in `onboarding.html` — styles, markup, and logic are all self-contained to keep sharing frictionless.
