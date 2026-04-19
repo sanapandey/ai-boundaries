@@ -55,7 +55,7 @@ body {
   padding: 14px;
   margin-bottom: 14px;
 }
-.graph-wrap svg { display: block; width: 100%; }
+.graph-wrap svg { display: block; width: 100%; aspect-ratio: 1 / 1; }
 
 /* ── Domain list ── */
 .domain-list {
@@ -178,6 +178,12 @@ function drawGraph(data) {
   const r25 = maxR * 0.25, r50 = maxR * 0.5, r75 = maxR * 0.75;
 
   let html = `
+    <defs>
+      <clipPath id="clip">
+        <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}"/>
+      </clipPath>
+    </defs>
+
     <!-- Quadrant fills -->
     <rect x="${PAD}" y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#eff6ff" opacity="0.7"/>
     <rect x="${CX}"  y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#f5f3ff" opacity="0.7"/>
@@ -190,12 +196,6 @@ function drawGraph(data) {
       <circle cx="${CX}" cy="${CY}" r="${r50}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
       <circle cx="${CX}" cy="${CY}" r="${r25}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
     </g>
-
-    <defs>
-      <clipPath id="clip">
-        <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}"/>
-      </clipPath>
-    </defs>
 
     <!-- Axes -->
     <line x1="${PAD}" y1="${CY}" x2="${PAD+SIZE}" y2="${CY}" stroke="#d1d5db" stroke-width="1"/>
@@ -227,8 +227,7 @@ function drawGraph(data) {
       const { x, y } = n2p(d.x, d.y);
       const q = quadrant(d.x, d.y);
       const col = dotColors[q] || '#94a3b8';
-      html += `<circle cx="${x}" cy="${y}" r="5" fill="${col}" opacity="0.85" clip-path="url(#clip)"/>`;
-      html += `<title>${d.name}</title>`;
+      html += `<circle cx="${x}" cy="${y}" r="5" fill="${col}" opacity="0.85" clip-path="url(#clip)"><title>${d.name}</title></circle>`;
     });
   }
 
