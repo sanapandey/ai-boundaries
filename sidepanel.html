@@ -133,7 +133,7 @@ body {
     <div class="header-title">AI Boundaries</div>
     <div class="header-sub">Your active domain map</div>
   </div>
-  <button class="setup-btn" onclick="openSetup()">Edit setup</button>
+  <button class="setup-btn" id="setup-btn">Edit setup</button>
 </div>
 
 <div class="graph-wrap">
@@ -272,6 +272,7 @@ function openSetup() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('setup-btn').addEventListener('click', openSetup);
   BoundariesStorage.load(refresh);
   BoundariesStorage.onChange(refresh);
 });
