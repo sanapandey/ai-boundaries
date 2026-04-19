@@ -122,7 +122,12 @@ function openSetup() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('setup-btn').addEventListener('click', openSetup);
-  BoundariesStorage.load(refresh);
-  BoundariesStorage.onChange(refresh);
+  try {
+    document.getElementById('setup-btn').addEventListener('click', openSetup);
+    BoundariesStorage.load(refresh);
+    BoundariesStorage.onChange(refresh);
+  } catch(e) {
+    document.getElementById('graph-container').innerHTML =
+      '<p style="color:red;font-size:11px;padding:8px">Error: ' + e.message + '</p>';
+  }
 });
