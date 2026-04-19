@@ -657,6 +657,62 @@ function genMarkdown() {
   return md;
 }
 
+function genMarkdownNewChat() {
+  const date = new Date().toISOString().split('T')[0];
+  const nc   = state.newChat;
+  const q    = quadrant(nc.x, nc.y);
+  const info = Q_INFO[q];
+  const pct  = intensity(nc.x, nc.y);
+  const roleDescs = {
+    'pro-a': 'Give concrete, actionable recommendations on every topic discussed.',
+    'pro-p': 'Surface information and options — let the user make final decisions on everything.',
+    'per-a': 'Offer direct, concrete personal guidance across all topics. Engage with care.',
+    'per-p': 'Reflect observations and patterns back gently. Keep a light touch on everything.',
+  };
+  let md = `# AI Session Default\n\n`;
+  md += `> _Last updated: ${date}_\n\n`;
+  md += `This file sets the default AI behavior for **all topics** in this session.\n`;
+  md += `Apply this role to every subject discussed unless the user specifies otherwise.\n\n`;
+  md += `---\n\n`;
+  md += `## Default Role: ${info.role}  *(${info.label})*\n\n`;
+  md += `> ${roleDescs[q]}\n\n`;
+  md += `**Intensity:** ${pct}% involvement\n\n`;
+  md += `---\n\n`;
+  md += `## What this means in practice\n\n`;
+  if (q === 'pro-a') {
+    md += `- Proactively suggest next steps, draft content, and make clear recommendations.\n`;
+    md += `- Don't just list options — take a position and explain your reasoning.\n`;
+    md += `- Treat every task like a collaborative work project.\n`;
+  } else if (q === 'pro-p') {
+    md += `- Present information, trade-offs, and options without pushing a conclusion.\n`;
+    md += `- Ask clarifying questions rather than assuming intent.\n`;
+    md += `- Summarize and organize — let the user decide what to act on.\n`;
+  } else if (q === 'per-a') {
+    md += `- Offer direct, honest personal guidance when asked.\n`;
+    md += `- It's okay to name patterns or make suggestions about personal choices.\n`;
+    md += `- Be supportive but concrete — the user wants more than validation.\n`;
+  } else {
+    md += `- Respond thoughtfully but don't push advice or strong opinions.\n`;
+    md += `- Mirror back what the user shares; ask gentle questions.\n`;
+    md += `- The user is in the driver's seat — follow their lead.\n`;
+  }
+  md += `\n---\n\n`;
+  md += `## Raw Coordinates\n\n`;
+  md += '```json\n';
+  md += JSON.stringify({
+    version: 1,
+    generated: date,
+    mode: 'new-chat-default',
+    role: info.role,
+    quadrant: info.label,
+    intensity: pct / 100,
+    x: Math.round(nc.x * 100) / 100,
+    y: Math.round(nc.y * 100) / 100,
+  }, null, 2);
+  md += '\n```\n';
+  return md;
+}
+
 // ═══════════════════════════════════════════════════
 // SVG Plot
 // ═══════════════════════════════════════════════════
@@ -976,6 +1032,49 @@ function bindPlot() {
 
 // ── Step 3 ───────────────────────────────────────
 function renderStep3() {
+  const nc = state.newChat;
+
+  if (nc.x !== null) {
+    // ── New-chat mode: single-role memory ──────────
+    const q    = quadrant(nc.x, nc.y);
+    const info = Q_INFO[q];
+    const pct  = intensity(nc.x, nc.y);
+    const md   = genMarkdownNewChat();
+    return `
+<div class="card">
+  <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  <div class="step-meta">
+    <span class="step-badge">Done</span>
+    <span class="step-of">Step 3 of 3</span>
+  </div>
+  <h1 class="step-title">Your Session Default</h1>
+  <p class="step-sub">This <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px">memory.md</code> will instruct AI to apply one role to <strong>all topics</strong> in any chat that loads it.</p>
+
+  <div class="preview-body">
+    <div class="q-cards" style="grid-template-columns:1fr;max-width:360px;margin:0 auto 26px">
+      <div class="q-card ${info.css}" style="text-align:center;padding:22px">
+        <div class="q-card-title" style="font-size:13px">${info.label}</div>
+        <div style="font-size:28px;font-weight:800;margin:10px 0 4px">${info.role}</div>
+        <div class="q-card-role" style="font-size:12px">${info.desc}</div>
+        <div style="margin-top:14px;font-size:13px;font-weight:700;opacity:0.8">${pct}% involvement</div>
+      </div>
+    </div>
+
+    <div class="md-section-label">memory.md preview <span style="font-weight:400;color:#64748b;font-size:10px;text-transform:none;letter-spacing:0">(editable)</span></div>
+    <textarea class="md-textarea" id="md-textarea" spellcheck="false">${escH(md)}</textarea>
+  </div>
+
+  <div class="step-footer">
+    <button class="btn btn-ghost" onclick="goTo(2)">← Edit</button>
+    <div class="export-btns">
+      <button class="btn btn-outline" id="copy-btn" onclick="copyMd()">Copy</button>
+      <button class="btn btn-primary" onclick="downloadMd()">Download memory.md</button>
+    </div>
+  </div>
+</div>`;
+  }
+
+  // ── Domain-map mode: original layout ──────────
   const placed = state.domains.filter(d => d.x !== null);
   const byQ = {};
   Q_ORDER.forEach(q => { byQ[q] = []; });
