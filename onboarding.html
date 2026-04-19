@@ -973,7 +973,7 @@ function renderStep2() {
     <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
     <span class="mapped-count"><strong>${placed.length}</strong> of ${state.domains.length} mapped</span>
     <button class="btn btn-primary" onclick="goTo(3)"
-      ${placed.length === 0 ? 'disabled' : ''}>Preview →</button>
+      ${placed.length === 0 && nc.x === null ? 'disabled' : ''}>Preview →</button>
   </div>
 </div>`;
 }
