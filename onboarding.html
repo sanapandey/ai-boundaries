@@ -365,6 +365,8 @@ body {
 }
 .chip-tray.pro { border-color: #93c5fd; color: #1d4ed8; }
 .chip-tray.per { border-color: #c4b5fd; color: #5b21b6; }
+.chip-tray.meta { border-color: #f59e0b; color: #92400e; background: #fffbeb; }
+.chip-tray.meta.selected-chip { background: #fef3c7; border-color: #f59e0b; color: #78350f; }
 .chip-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
@@ -372,6 +374,18 @@ body {
 }
 .chip-tray.pro .chip-dot { background: #3b82f6; }
 .chip-tray.per .chip-dot { background: #8b5cf6; }
+.chip-tray.meta .chip-dot { background: #f59e0b; }
+.cq-meta { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+.new-chat-tray {
+  padding: 0 32px 0;
+}
+.new-chat-tray .tray-label { margin-bottom: 8px; }
+.new-chat-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 6px;
+  font-style: italic;
+}
 
 /* ── Add domain ─────────────────────────────────── */
 .add-row {
@@ -530,6 +544,8 @@ const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
 // ═══════════════════════════════════════════════════
 // State
 // ═══════════════════════════════════════════════════
+const NEW_CHAT_DOMAIN = { id:'new-chat', name:'New Chat (default)', cat:'meta', x: null, y: null, custom: false };
+
 const PRESETS = [
   { id:'career-planning',       name:'Career Planning',      cat:'pro' },
   { id:'email-drafting',        name:'Email Drafting',       cat:'pro' },
@@ -544,6 +560,7 @@ const PRESETS = [
 let state = {
   step: 1,
   domains: PRESETS.map(d => ({ ...d, x: null, y: null, custom: false })),
+  newChat: { ...NEW_CHAT_DOMAIN },
   selectedId: null,
   hoverPos: null,   // { x, y } pixel, when domain selected and mouse over plot
 };
@@ -598,6 +615,16 @@ function genMarkdown() {
   });
 
   if (!hasPlaced) { md += `## No domains mapped yet.\n\n---\n\n`; }
+
+  const nc = state.newChat;
+  if (nc.x !== null) {
+    const ncQ = Q_INFO[quadrant(nc.x, nc.y)];
+    md += `## New Chat Default\n\n`;
+    md += `> Used when no specific domain is set for a session.\n\n`;
+    md += `- **Role:** ${ncQ.role} (${ncQ.label})\n`;
+    md += `- **Intensity:** ${intensity(nc.x, nc.y)}% involvement\n`;
+    md += `\n---\n\n`;
+  }
 
   if (unplaced.length > 0) {
     md += `## No AI Involvement\n\n`;
@@ -796,22 +823,22 @@ function renderStep1() {
 function renderStep2() {
   const placed   = state.domains.filter(d => d.x !== null);
   const unplaced = state.domains.filter(d => d.x === null);
+  const nc       = state.newChat;
   const sel      = state.selectedId;
-  const selDom   = sel ? state.domains.find(d => d.id === sel) : null;
+  const allDoms  = [...state.domains, nc];
+  const selDom   = sel ? allDoms.find(d => d.id === sel) : null;
 
   const hint = selDom
     ? `Placing: <strong>${selDom.name}</strong> — click anywhere on the grid`
-    : placed.length > 0
+    : placed.length > 0 || nc.x !== null
       ? `Click a domain chip below to select it, then click the grid to place it`
       : `Select a domain chip below, then click the grid to place it`;
 
-  const placedChips = placed.map(d => {
+  const renderPlacedChip = (d, chipCss) => {
     const { x: px, y: py } = n2p(d.x, d.y);
-    const q  = quadrant(d.x, d.y);
     const it = intensity(d.x, d.y);
-    const qcss = Q_INFO[q].chipCss;
     const isSelected = sel === d.id;
-    return `<div class="chip-placed ${qcss}${isSelected ? ' selected-chip' : ''}"
+    return `<div class="chip-placed ${chipCss}${isSelected ? ' selected-chip' : ''}"
       style="left:${px}px;top:${py}px"
       data-id="${d.id}"
       onclick="selectDomain('${d.id}', event)">
@@ -819,7 +846,12 @@ function renderStep2() {
       <span class="chip-pct">${it}%</span>
       <span class="chip-x" onclick="unplace('${d.id}',event)" title="Remove from map">✕</span>
     </div>`;
-  }).join('');
+  };
+
+  const placedChips = [
+    ...placed.map(d => renderPlacedChip(d, Q_INFO[quadrant(d.x, d.y)].chipCss)),
+    ...(nc.x !== null ? [renderPlacedChip(nc, 'cq-meta')] : [])
+  ].join('');
 
   const trayChips = unplaced.length > 0
     ? unplaced.map(d => {
@@ -831,6 +863,17 @@ function renderStep2() {
         </div>`;
       }).join('')
     : `<span class="tray-empty">All domains are on the map ✓</span>`;
+
+  const ncSelected = sel === 'new-chat';
+  const newChatChip = nc.x === null
+    ? `<div class="chip-tray meta${ncSelected ? ' selected-chip' : ''}"
+        data-id="new-chat"
+        onclick="selectDomain('new-chat', event)">
+        <span class="chip-dot"></span>New Chat (default)
+      </div>`
+    : `<span style="font-size:11.5px;color:#92400e;font-weight:500">Placed at ${intensity(nc.x,nc.y)}% —
+        <span style="cursor:pointer;text-decoration:underline" onclick="unplace('new-chat',event)">remove</span>
+      </span>`;
 
   return `
 <div class="card" style="max-width:620px">
@@ -856,6 +899,12 @@ function renderStep2() {
   <div class="tray-section">
     <div class="tray-label">${unplaced.length > 0 ? 'Unplaced domains' : 'All placed'}</div>
     <div class="tray" id="tray">${trayChips}</div>
+  </div>
+
+  <div class="new-chat-tray tray-section" style="margin-top:12px">
+    <div class="tray-label">New Chat default</div>
+    <div class="tray" style="min-height:unset;padding:8px 10px">${newChatChip}</div>
+    <div class="new-chat-hint">Set a default position for any chat that doesn't specify a domain.</div>
   </div>
 
   <div class="add-row">
@@ -884,8 +933,12 @@ function bindPlot() {
     const py = e.clientY - rect.top;
     if (px >= PL && px <= PL + CW && py >= PT && py <= PT + CH) {
       const { nx, ny } = p2n(px, py);
-      const dom = state.domains.find(d => d.id === state.selectedId);
-      if (dom) { dom.x = nx; dom.y = ny; }
+      if (state.selectedId === 'new-chat') {
+        state.newChat.x = nx; state.newChat.y = ny;
+      } else {
+        const dom = state.domains.find(d => d.id === state.selectedId);
+        if (dom) { dom.x = nx; dom.y = ny; }
+      }
       state.selectedId = null;
       state.hoverPos = null;
       render();
@@ -901,7 +954,9 @@ function bindPlot() {
     const preview = document.getElementById('hover-preview');
     if (!preview) return;
     if (inside) {
-      const selDom = state.domains.find(d => d.id === state.selectedId);
+      const selDom = state.selectedId === 'new-chat'
+        ? state.newChat
+        : state.domains.find(d => d.id === state.selectedId);
       const label  = selDom ? selDom.name : '';
       preview.style.display = 'block';
       preview.innerHTML = `
@@ -992,8 +1047,12 @@ function selectDomain(id, e) {
 
 function unplace(id, e) {
   if (e) e.stopPropagation();
-  const dom = state.domains.find(d => d.id === id);
-  if (dom) { dom.x = null; dom.y = null; }
+  if (id === 'new-chat') {
+    state.newChat.x = null; state.newChat.y = null;
+  } else {
+    const dom = state.domains.find(d => d.id === id);
+    if (dom) { dom.x = null; dom.y = null; }
+  }
   if (state.selectedId === id) state.selectedId = null;
   render();
 }
