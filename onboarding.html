@@ -375,7 +375,7 @@ body {
 .chip-tray.pro .chip-dot { background: #3b82f6; }
 .chip-tray.per .chip-dot { background: #8b5cf6; }
 .chip-tray.meta .chip-dot { background: #f59e0b; }
-.cq-meta { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+.cq-meta { background: #dabf52; border-color: #fcd34d; color: #92400e; }
 .new-chat-tray {
   padding: 0 32px 0;
 }
@@ -547,14 +547,16 @@ const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
 const NEW_CHAT_DOMAIN = { id:'new-chat', name:'New Chat (default)', cat:'meta', x: null, y: null, custom: false };
 
 const PRESETS = [
-  { id:'career-planning',       name:'Career Planning',      cat:'pro' },
-  { id:'email-drafting',        name:'Email Drafting',       cat:'pro' },
-  { id:'hiring',                name:'Hiring',               cat:'pro' },
-  { id:'coding',                name:'Coding',               cat:'pro' },
-  { id:'experimental-design',   name:'Experimental Design',  cat:'pro' },
-  { id:'mental-health',         name:'Mental Health',        cat:'per' },
-  { id:'relationship-advice',   name:'Relationship Advice',  cat:'per' },
-  { id:'communication',         name:'Communication Skills', cat:'per' },
+  { id:'email-drafting',        name:'Email Drafting',       cat:'pro', suggestedQ:'pro-a' },
+  { id:'coding',                name:'Coding',               cat:'pro', suggestedQ:'pro-a' },
+  { id:'career-planning',       name:'Career Planning',      cat:'pro', suggestedQ:'pro-p' },
+  { id:'hiring',                name:'Hiring',               cat:'pro', suggestedQ:'pro-p' },
+  { id:'experimental-design',   name:'Experimental Design',  cat:'pro', suggestedQ:'pro-p' },
+  { id:'mental-health',         name:'Mental Health',        cat:'per', suggestedQ:'per-a' },
+  { id:'communication',         name:'Communication Skills', cat:'per', suggestedQ:'per-a' },
+  { id:'relationship-advice',   name:'Relationship Advice',  cat:'per', suggestedQ:'per-p' },
+  { id:'dating-advice',         name:'Dating Advice',        cat:'per', suggestedQ:'per-p' },
+  { id:'family-relationships',  name:'Family Relationships', cat:'per', suggestedQ:'per-p' },
 ];
 
 let state = {
@@ -796,8 +798,9 @@ function render() {
 
 // ── Step 1 ───────────────────────────────────────
 function renderStep1() {
-  const pros = state.domains.filter(d => !d.custom && d.cat === 'pro');
-  const pers = state.domains.filter(d => !d.custom && d.cat === 'per');
+  const byQ = {};
+  Q_ORDER.forEach(q => { byQ[q] = []; });
+  state.domains.filter(d => !d.custom && d.suggestedQ).forEach(d => byQ[d.suggestedQ].push(d));
   return `
 <div class="card">
   <div class="progress-track"><div class="progress-fill" style="width:33%"></div></div>
@@ -857,10 +860,21 @@ function renderStep1() {
     </div>
 
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:10px">You'll map these domains</div>
-    <div class="domain-pills">
-      ${pros.map(d => `<span class="dpill pro">${d.name}</span>`).join('')}
-      ${pers.map(d => `<span class="dpill per">${d.name}</span>`).join('')}
-      <span class="dpill add">+ add your own</span>
+    <div class="quadrant-preview" style="margin-bottom:10px">
+      ${Q_ORDER.map(q => {
+        const info = Q_INFO[q];
+        const doms = byQ[q];
+        const pillColors = { 'pro-a':'pro', 'pro-p':'pro', 'per-a':'per', 'per-p':'per' };
+        return `<div class="qp-cell qp-${q.replace('-','')}">
+          <div class="qp-role" style="margin-bottom:7px">${info.role}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            ${doms.map(d => `<span class="dpill ${pillColors[q]}" style="font-size:10.5px;padding:3px 9px">${d.name}</span>`).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-bottom:22px">
+      <span class="dpill add">+ you can add your own on the next step</span>
     </div>
 
     <div class="info-box">
