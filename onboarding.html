@@ -570,8 +570,48 @@ let state = {
 // ═══════════════════════════════════════════════════
 // Markdown
 // ═══════════════════════════════════════════════════
-function mirrorInstructions() {
-  return `### Behavior instructions for this quadrant
+function quadrantInstructions(q) {
+  const blocks = {
+    'pro-a': `### Behavior instructions for this quadrant
+
+When the user raises a topic that falls here, **act as an active collaborator**. Don't just list options — take a position, make a clear recommendation, and explain your reasoning. Be direct and action-oriented.
+
+**Example response openers:**
+- "Here's what I'd recommend doing next: ..."
+- "Based on what you've shared, here's a concrete plan: ..."
+- "Let me draft that for you — here's a first pass: ..."
+- "I'd go with option X here, because ..."
+- "The fastest path forward looks like this: ..."
+
+Keep responses decisive and focused on moving the work forward.\n`,
+
+    'pro-p': `### Behavior instructions for this quadrant
+
+When the user raises a topic that falls here, **surface information and options without pushing a conclusion**. Present trade-offs clearly, ask clarifying questions if needed, and let the user decide what to act on.
+
+**Example response openers:**
+- "Here are a few options worth considering, along with the key trade-offs: ..."
+- "Here's some background that might inform your decision: ..."
+- "A couple of approaches come to mind — here's how they differ: ..."
+- "Before making a call, it might help to know: ..."
+- "What's driving this decision? That'll shape which direction makes most sense."
+
+Organize and inform — don't conclude on the user's behalf.\n`,
+
+    'per-a': `### Behavior instructions for this quadrant
+
+When the user raises a topic that falls here, **offer direct, honest personal guidance**. It's appropriate to name patterns, make concrete suggestions, and gently challenge assumptions — while staying supportive and warm.
+
+**Example response openers:**
+- "Based on what you've shared, here's what I'd suggest: ..."
+- "I notice a pattern here — have you considered that ..."
+- "Here's a concrete next step that might help: ..."
+- "It sounds like you're weighing X against Y — one way to think about it: ..."
+- "That's worth taking seriously. Here's how I'd approach it: ..."
+
+Be honest and concrete — the user wants more than validation.\n`,
+
+    'per-p': `### Behavior instructions for this quadrant
 
 When the user raises a topic that falls here, **do not give a direct answer or recommendation**. Instead, respond with one or two reflective prompts chosen to fit the specific query. Use your judgment to select the most appropriate prompt(s) from the examples below — or compose a similar one in the same spirit.
 
@@ -580,8 +620,11 @@ When the user raises a topic that falls here, **do not give a direct answer or r
 - "Please reflect on the current trade-offs that you are weighing."
 - "What is the current roadblock that you are facing? What problem are you facing at this very moment?"
 - "I encourage you to talk to a trusted family member or friend about this."
+- "Take a deep breath. What does your intuition say about this?"
 
-The goal is to turn the question back toward the user's own insight rather than providing an external answer. Keep your response warm, brief, and non-prescriptive.\n`;
+The goal is to turn the question back toward the user's own insight rather than providing an external answer. Keep your response warm, brief, and non-prescriptive.\n`,
+  };
+  return blocks[q] || '';
 }
 
 function genMarkdown() {
@@ -627,7 +670,7 @@ function genMarkdown() {
     doms.forEach(d => {
       md += `- **${d.name}** — ${intensity(d.x, d.y)}% involvement\n`;
     });
-    if (q === 'per-p') { md += `\n${mirrorInstructions()}`; }
+    md += `\n${quadrantInstructions(q)}`;
     md += `\n---\n\n`;
   });
 
@@ -712,7 +755,7 @@ function genMarkdownNewChat() {
     md += `- Respond thoughtfully but don't push advice or strong opinions.\n`;
     md += `- Mirror back what the user shares; ask gentle questions.\n`;
     md += `- The user is in the driver's seat — follow their lead.\n`;
-    md += `\n${mirrorInstructions()}`;
+    md += `\n${quadrantInstructions(q)}`;
   }
   md += `\n---\n\n`;
   md += `## Raw Coordinates\n\n`;
