@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Boundaries</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #f0f2f8;
+  min-height: 100vh;
+  padding: 16px;
+  color: #1e293b;
+  font-size: 13px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.header-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+.header-sub {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+.setup-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  border: none;
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.setup-btn:hover { background: #e0e7ff; }
+
+/* ── Quadrant graph ── */
+.graph-wrap {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.graph-wrap svg { display: block; width: 100%; }
+
+/* ── Domain list ── */
+.domain-list {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.domain-list-header {
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid #f1f5f9;
+}
+.domain-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f8fafc;
+  gap: 8px;
+}
+.domain-row:last-child { border-bottom: none; }
+.domain-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.domain-name { flex: 1; font-size: 12px; font-weight: 500; }
+.domain-role {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid;
+}
+.domain-pct { font-size: 10px; color: #94a3b8; min-width: 30px; text-align: right; }
+
+.role-pa { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+.role-pp { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
+.role-xa { background:#f5f3ff; border-color:#ddd6fe; color:#6d28d9; }
+.role-xp { background:#fffbeb; border-color:#fde68a; color:#b45309; }
+.dot-pa { background:#3b82f6; }
+.dot-pp { background:#22c55e; }
+.dot-xa { background:#8b5cf6; }
+.dot-xp { background:#f59e0b; }
+.dot-nc { background:#f59e0b; }
+
+.empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.empty-state strong { display: block; font-size: 13px; color: #64748b; margin-bottom: 6px; }
+
+.new-chat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #fffbeb;
+  border-bottom: 1px solid #fef3c7;
+}
+.new-chat-label { font-size: 10px; font-weight: 700; color: #92400e; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">AI Boundaries</div>
+    <div class="header-sub">Your active domain map</div>
+  </div>
+  <button class="setup-btn" onclick="openSetup()">Edit setup</button>
+</div>
+
+<div class="graph-wrap">
+  <svg id="graph-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="domain-list" id="domain-list"></div>
+
+<script src="storage.js"></script>
+<script>
+const Q_INFO = {
+  'pro-a': { role:'Co-pilot',   roleClass:'role-pa', dotClass:'dot-pa' },
+  'pro-p': { role:'Researcher', roleClass:'role-pp', dotClass:'dot-pp' },
+  'per-a': { role:'Coach',      roleClass:'role-xa', dotClass:'dot-xa' },
+  'per-p': { role:'Mirror',     roleClass:'role-xp', dotClass:'dot-xp' },
+};
+
+// Graph constants (viewBox 260×260, chart area inset by 30px each side)
+const PAD = 30, SIZE = 200;
+const CX = PAD + SIZE / 2, CY = PAD + SIZE / 2;
+
+function n2p(nx, ny) {
+  return {
+    x: PAD + (nx + 1) / 2 * SIZE,
+    y: PAD + (1 - ny) / 2 * SIZE,
+  };
+}
+
+function quadrant(nx, ny) {
+  return (nx <= 0 ? 'pro' : 'per') + '-' + (ny >= 0 ? 'a' : 'p');
+}
+
+function intensity(nx, ny) {
+  return Math.round(Math.sqrt(nx * nx + ny * ny) / Math.sqrt(2) * 100);
+}
+
+function drawGraph(data) {
+  const svg = document.getElementById('graph-svg');
+
+  const maxR = (SIZE / 2) * Math.sqrt(2);
+  const r25 = maxR * 0.25, r50 = maxR * 0.5, r75 = maxR * 0.75;
+
+  let html = `
+    <!-- Quadrant fills -->
+    <rect x="${PAD}" y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#eff6ff" opacity="0.7"/>
+    <rect x="${CX}"  y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#f5f3ff" opacity="0.7"/>
+    <rect x="${PAD}" y="${CY}"  width="${SIZE/2}" height="${SIZE/2}" fill="#f0fdf4" opacity="0.7"/>
+    <rect x="${CX}"  y="${CY}"  width="${SIZE/2}" height="${SIZE/2}" fill="#fffbeb" opacity="0.7"/>
+
+    <!-- Intensity rings -->
+    <g clip-path="url(#clip)" opacity="0.12">
+      <circle cx="${CX}" cy="${CY}" r="${r75}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
+      <circle cx="${CX}" cy="${CY}" r="${r50}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
+      <circle cx="${CX}" cy="${CY}" r="${r25}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
+    </g>
+
+    <defs>
+      <clipPath id="clip">
+        <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}"/>
+      </clipPath>
+    </defs>
+
+    <!-- Axes -->
+    <line x1="${PAD}" y1="${CY}" x2="${PAD+SIZE}" y2="${CY}" stroke="#d1d5db" stroke-width="1"/>
+    <line x1="${CX}" y1="${PAD}" x2="${CX}" y2="${PAD+SIZE}" stroke="#d1d5db" stroke-width="1"/>
+
+    <!-- Border -->
+    <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}" fill="none" stroke="#e2e8f0" stroke-width="1" rx="2"/>
+
+    <!-- Center -->
+    <circle cx="${CX}" cy="${CY}" r="2.5" fill="#e2e8f0"/>
+
+    <!-- Axis labels -->
+    <text x="${PAD-4}" y="${CY}" text-anchor="end" dominant-baseline="middle" font-size="8" font-weight="700" fill="#3b82f6" font-family="Inter,system-ui">Pro</text>
+    <text x="${PAD+SIZE+4}" y="${CY}" text-anchor="start" dominant-baseline="middle" font-size="8" font-weight="700" fill="#8b5cf6" font-family="Inter,system-ui">Per</text>
+    <text x="${CX}" y="${PAD-6}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155" font-family="Inter,system-ui">Active</text>
+    <text x="${CX}" y="${PAD+SIZE+12}" text-anchor="middle" dominant-baseline="hanging" font-size="8" font-weight="700" fill="#334155" font-family="Inter,system-ui">Passive</text>
+
+    <!-- Quadrant role labels -->
+    <text x="${PAD+4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#3b82f6" opacity="0.7" font-family="Inter,system-ui">Co-pilot</text>
+    <text x="${PAD+SIZE-4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#7c3aed" opacity="0.7" text-anchor="end" font-family="Inter,system-ui">Coach</text>
+    <text x="${PAD+4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#15803d" opacity="0.7" font-family="Inter,system-ui">Researcher</text>
+    <text x="${PAD+SIZE-4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#b45309" opacity="0.7" text-anchor="end" font-family="Inter,system-ui">Mirror</text>
+  `;
+
+  // Placed domains
+  const dotColors = { 'pro-a':'#3b82f6','pro-p':'#22c55e','per-a':'#8b5cf6','per-p':'#f59e0b' };
+  if (data && data.domains) {
+    data.domains.filter(d => d.x !== null).forEach(d => {
+      const { x, y } = n2p(d.x, d.y);
+      const q = quadrant(d.x, d.y);
+      const col = dotColors[q] || '#94a3b8';
+      html += `<circle cx="${x}" cy="${y}" r="5" fill="${col}" opacity="0.85" clip-path="url(#clip)"/>`;
+      html += `<title>${d.name}</title>`;
+    });
+  }
+
+  // New-chat dot (larger, amber outline)
+  if (data && data.newChat) {
+    const { x, y } = n2p(data.newChat.x, data.newChat.y);
+    html += `<circle cx="${x}" cy="${y}" r="7" fill="#f59e0b" opacity="0.9" stroke="#fff" stroke-width="2" clip-path="url(#clip)"/>`;
+  }
+
+  svg.innerHTML = html;
+}
+
+function renderList(data) {
+  const list = document.getElementById('domain-list');
+  const placed = data && data.domains ? data.domains.filter(d => d.x !== null) : [];
+
+  if (!placed.length && !data?.newChat) {
+    list.innerHTML = `<div class="empty-state">
+      <strong>No domains mapped yet</strong>
+      Click "Edit setup" to map your AI boundaries.
+    </div>`;
+    return;
+  }
+
+  let html = `<div class="domain-list-header">Active domains</div>`;
+
+  if (data.newChat) {
+    const q  = quadrant(data.newChat.x, data.newChat.y);
+    const qi = Q_INFO[q];
+    const pct = intensity(data.newChat.x, data.newChat.y);
+    html += `<div class="new-chat-row">
+      <span style="font-size:9px">★</span>
+      <span class="domain-name" style="font-size:11px;color:#92400e">New Chat default</span>
+      <span class="domain-role ${qi.roleClass}">${qi.role}</span>
+      <span class="domain-pct">${pct}%</span>
+    </div>`;
+  }
+
+  placed.forEach(d => {
+    const q  = quadrant(d.x, d.y);
+    const qi = Q_INFO[q];
+    const pct = intensity(d.x, d.y);
+    html += `<div class="domain-row">
+      <span class="domain-dot ${qi.dotClass}"></span>
+      <span class="domain-name">${d.name}</span>
+      <span class="domain-role ${qi.roleClass}">${qi.role}</span>
+      <span class="domain-pct">${pct}%</span>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+function refresh(data) {
+  drawGraph(data);
+  renderList(data);
+}
+
+function openSetup() {
+  chrome.runtime.openOptionsPage();
+}
+
+// Initial load
+BoundariesStorage.load(refresh);
+
+// Live updates when user changes settings
+BoundariesStorage.onChange(refresh);
+</script>
+</body>
+</html>

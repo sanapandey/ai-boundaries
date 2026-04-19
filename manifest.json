@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "AI Boundaries",
+  "version": "0.1.0",
+  "description": "Shows your AI boundary quadrant map in a side panel while you chat.",
+
+  "permissions": ["storage", "sidePanel"],
+  "host_permissions": ["<all_urls>"],
+
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+
+  "action": {
+    "default_title": "AI Boundaries",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "options_page": "onboarding.html",
+
+  "background": {
+    "service_worker": "background.js"
+  }
+}

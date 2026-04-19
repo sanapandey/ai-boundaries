@@ -505,6 +505,7 @@ body {
 <body>
 <div id="app"></div>
 
+<script src="storage.js"></script>
 <script>
 // ═══════════════════════════════════════════════════
 // Constants
@@ -1069,6 +1070,7 @@ function bindPlot() {
       }
       state.selectedId = null;
       state.hoverPos = null;
+      persistState();
       render();
     }
   });
@@ -1225,6 +1227,7 @@ function unplace(id, e) {
     if (dom) { dom.x = null; dom.y = null; }
   }
   if (state.selectedId === id) state.selectedId = null;
+  persistState();
   render();
 }
 
@@ -1241,6 +1244,10 @@ function addCustom() {
   state.domains.push({ id: 'c-' + Date.now(), name, cat: 'pro', x: null, y: null, custom: true });
   inp.value = '';
   render();
+}
+
+function persistState() {
+  BoundariesStorage.save({ domains: state.domains, newChat: state.newChat });
 }
 
 function getMdContent() {
@@ -1284,7 +1291,24 @@ function syntaxHL(s) {
 // ═══════════════════════════════════════════════════
 // Init
 // ═══════════════════════════════════════════════════
-render();
+BoundariesStorage.load(function(saved) {
+  if (saved && saved.domains) {
+    // Restore coordinates onto matching preset domains
+    saved.domains.forEach(s => {
+      const d = state.domains.find(d => d.id === s.id);
+      if (d) { d.x = s.x; d.y = s.y; }
+      else if (s.custom) {
+        state.domains.push({ id: s.id, name: s.name, cat: s.cat, custom: true,
+          suggestedQ: s.suggestedQ || null, x: s.x, y: s.y });
+      }
+    });
+    if (saved.newChat) {
+      state.newChat.x = saved.newChat.x;
+      state.newChat.y = saved.newChat.y;
+    }
+  }
+  render();
+});
 </script>
 </body>
 </html>
