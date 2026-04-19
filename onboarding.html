@@ -197,8 +197,8 @@ body {
   padding: 4px 11px;
   border-radius: 20px;
 }
-.dpill.pro { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
-.dpill.per { background:#f5f3ff; color:#7c3aed; border:1px solid #ddd6fe; }
+.dpill.pro { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+.dpill.per { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 .dpill.add { background:#f8fafc; color:#94a3b8; border:1px dashed #e2e8f0; }
 
 .info-box {
@@ -534,10 +534,10 @@ function quadrant(nx, ny) {
 }
 
 const Q_INFO = {
-  'pro-a': { label: 'Professional · Active', role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
-  'pro-p': { label: 'Professional · Passive',role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
-  'per-a': { label: 'Personal · Active',     role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
-  'per-p': { label: 'Personal · Passive',    role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
+  'pro-a': { label: 'Professional · Active', role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', qpCss: 'qp-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
+  'pro-p': { label: 'Professional · Passive',role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', qpCss: 'qp-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
+  'per-a': { label: 'Personal · Active',     role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', qpCss: 'qp-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
+  'per-p': { label: 'Personal · Passive',    role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', qpCss: 'qp-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
 };
 const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
 
@@ -865,7 +865,7 @@ function renderStep1() {
         const info = Q_INFO[q];
         const doms = byQ[q];
         const pillColors = { 'pro-a':'pro', 'pro-p':'pro', 'per-a':'per', 'per-p':'per' };
-        return `<div class="qp-cell qp-${q.replace('-','')}">
+        return `<div class="qp-cell ${info.qpCss}">
           <div class="qp-role" style="margin-bottom:7px">${info.role}</div>
           <div style="display:flex;flex-wrap:wrap;gap:5px">
             ${doms.map(d => `<span class="dpill ${pillColors[q]}" style="font-size:10.5px;padding:3px 9px">${d.name}</span>`).join('')}
