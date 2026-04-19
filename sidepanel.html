@@ -4,13 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Boundaries</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: #f0f2f8;
   min-height: 100vh;
   padding: 16px;
@@ -55,7 +53,8 @@ body {
   padding: 14px;
   margin-bottom: 14px;
 }
-.graph-wrap svg { display: block; width: 100%; aspect-ratio: 1 / 1; }
+.graph-wrap { min-height: 200px; }
+#graph-container svg { display: block; width: 100%; height: auto; }
 
 /* ── Domain list ── */
 .domain-list {
@@ -138,7 +137,7 @@ body {
 </div>
 
 <div class="graph-wrap">
-  <svg id="graph-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="graph-container"></div>
 </div>
 
 <div class="domain-list" id="domain-list"></div>
@@ -172,72 +171,54 @@ function intensity(nx, ny) {
 }
 
 function drawGraph(data) {
-  const svg = document.getElementById('graph-svg');
+  const container = document.getElementById('graph-container');
 
   const maxR = (SIZE / 2) * Math.sqrt(2);
   const r25 = maxR * 0.25, r50 = maxR * 0.5, r75 = maxR * 0.75;
+  const dotColors = { 'pro-a':'#3b82f6','pro-p':'#22c55e','per-a':'#8b5cf6','per-p':'#f59e0b' };
 
-  let html = `
+  let dots = '';
+  if (data && data.domains) {
+    data.domains.filter(d => d.x !== null).forEach(d => {
+      const { x, y } = n2p(d.x, d.y);
+      const col = dotColors[quadrant(d.x, d.y)] || '#94a3b8';
+      dots += `<circle cx="${x}" cy="${y}" r="5" fill="${col}" opacity="0.85"/>`;
+    });
+  }
+  if (data && data.newChat) {
+    const { x, y } = n2p(data.newChat.x, data.newChat.y);
+    dots += `<circle cx="${x}" cy="${y}" r="7" fill="#f59e0b" opacity="0.9" stroke="#fff" stroke-width="2"/>`;
+  }
+
+  container.innerHTML = `<svg viewBox="0 0 260 260" width="100%" height="260" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <clipPath id="clip">
         <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}"/>
       </clipPath>
     </defs>
-
-    <!-- Quadrant fills -->
     <rect x="${PAD}" y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#eff6ff" opacity="0.7"/>
     <rect x="${CX}"  y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#f5f3ff" opacity="0.7"/>
     <rect x="${PAD}" y="${CY}"  width="${SIZE/2}" height="${SIZE/2}" fill="#f0fdf4" opacity="0.7"/>
     <rect x="${CX}"  y="${CY}"  width="${SIZE/2}" height="${SIZE/2}" fill="#fffbeb" opacity="0.7"/>
-
-    <!-- Intensity rings -->
     <g clip-path="url(#clip)" opacity="0.12">
       <circle cx="${CX}" cy="${CY}" r="${r75}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
       <circle cx="${CX}" cy="${CY}" r="${r50}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
       <circle cx="${CX}" cy="${CY}" r="${r25}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
     </g>
-
-    <!-- Axes -->
     <line x1="${PAD}" y1="${CY}" x2="${PAD+SIZE}" y2="${CY}" stroke="#d1d5db" stroke-width="1"/>
     <line x1="${CX}" y1="${PAD}" x2="${CX}" y2="${PAD+SIZE}" stroke="#d1d5db" stroke-width="1"/>
-
-    <!-- Border -->
     <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}" fill="none" stroke="#e2e8f0" stroke-width="1" rx="2"/>
-
-    <!-- Center -->
     <circle cx="${CX}" cy="${CY}" r="2.5" fill="#e2e8f0"/>
-
-    <!-- Axis labels -->
-    <text x="${PAD-4}" y="${CY}" text-anchor="end" dominant-baseline="middle" font-size="8" font-weight="700" fill="#3b82f6" font-family="Inter,system-ui">Pro</text>
-    <text x="${PAD+SIZE+4}" y="${CY}" text-anchor="start" dominant-baseline="middle" font-size="8" font-weight="700" fill="#8b5cf6" font-family="Inter,system-ui">Per</text>
-    <text x="${CX}" y="${PAD-6}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155" font-family="Inter,system-ui">Active</text>
-    <text x="${CX}" y="${PAD+SIZE+12}" text-anchor="middle" dominant-baseline="hanging" font-size="8" font-weight="700" fill="#334155" font-family="Inter,system-ui">Passive</text>
-
-    <!-- Quadrant role labels -->
-    <text x="${PAD+4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#3b82f6" opacity="0.7" font-family="Inter,system-ui">Co-pilot</text>
-    <text x="${PAD+SIZE-4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#7c3aed" opacity="0.7" text-anchor="end" font-family="Inter,system-ui">Coach</text>
-    <text x="${PAD+4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#15803d" opacity="0.7" font-family="Inter,system-ui">Researcher</text>
-    <text x="${PAD+SIZE-4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#b45309" opacity="0.7" text-anchor="end" font-family="Inter,system-ui">Mirror</text>
-  `;
-
-  // Placed domains
-  const dotColors = { 'pro-a':'#3b82f6','pro-p':'#22c55e','per-a':'#8b5cf6','per-p':'#f59e0b' };
-  if (data && data.domains) {
-    data.domains.filter(d => d.x !== null).forEach(d => {
-      const { x, y } = n2p(d.x, d.y);
-      const q = quadrant(d.x, d.y);
-      const col = dotColors[q] || '#94a3b8';
-      html += `<circle cx="${x}" cy="${y}" r="5" fill="${col}" opacity="0.85" clip-path="url(#clip)"><title>${d.name}</title></circle>`;
-    });
-  }
-
-  // New-chat dot (larger, amber outline)
-  if (data && data.newChat) {
-    const { x, y } = n2p(data.newChat.x, data.newChat.y);
-    html += `<circle cx="${x}" cy="${y}" r="7" fill="#f59e0b" opacity="0.9" stroke="#fff" stroke-width="2" clip-path="url(#clip)"/>`;
-  }
-
-  svg.innerHTML = html;
+    <text x="${PAD-4}" y="${CY}" text-anchor="end" dominant-baseline="middle" font-size="8" font-weight="700" fill="#3b82f6">Pro</text>
+    <text x="${PAD+SIZE+4}" y="${CY}" text-anchor="start" dominant-baseline="middle" font-size="8" font-weight="700" fill="#8b5cf6">Per</text>
+    <text x="${CX}" y="${PAD-6}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Active</text>
+    <text x="${CX}" y="${PAD+SIZE+14}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Passive</text>
+    <text x="${PAD+4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#3b82f6" opacity="0.7">Co-pilot</text>
+    <text x="${PAD+SIZE-4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#7c3aed" opacity="0.7" text-anchor="end">Coach</text>
+    <text x="${PAD+4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#15803d" opacity="0.7">Researcher</text>
+    <text x="${PAD+SIZE-4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#b45309" opacity="0.7" text-anchor="end">Mirror</text>
+    <g clip-path="url(#clip)">${dots}</g>
+  </svg>`;
 }
 
 function renderList(data) {
@@ -290,11 +271,10 @@ function openSetup() {
   chrome.runtime.openOptionsPage();
 }
 
-// Initial load
-BoundariesStorage.load(refresh);
-
-// Live updates when user changes settings
-BoundariesStorage.onChange(refresh);
+document.addEventListener('DOMContentLoaded', function() {
+  BoundariesStorage.load(refresh);
+  BoundariesStorage.onChange(refresh);
+});
 </script>
 </body>
 </html>
