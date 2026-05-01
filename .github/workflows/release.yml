@@ -1,0 +1,23 @@
+name: Package Extension on Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Zip extension
+        run: |
+          cd ai-boundaries
+          zip -r ../ai-boundaries.zip . -x ".git*" "node_modules/*" ".DS_Store"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ai-boundaries.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

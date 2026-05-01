@@ -45,12 +45,25 @@ See memory.md in the project root for my AI boundary preferences.
 
 The repo also ships as a Chrome extension that shows your quadrant map in a side panel while you use any AI chat tool.
 
+### Installing the extension
+
+**Option 1: Download (no cloning needed)**
+
+1. Go to [Releases](../../releases) and download the latest `ai-boundaries.zip`
+2. Unzip it anywhere (e.g., `~/Downloads/ai-boundaries`)
+3. Follow the loading steps below using the unzipped folder
+
+**Option 2: Load from source (requires cloning)**
+
+1. Clone this repo: `git clone <url> && cd ai-boundaries`
+2. Follow the loading steps below using the repo folder
+
 ### Loading the extension
 
 1. Open Chrome and go to `chrome://extensions`
 2. Enable **Developer Mode** using the toggle in the top-right corner
 3. Click **Load unpacked**
-4. Select the `ai-boundaries` folder (the root of this repo)
+4. Select the `ai-boundaries` folder
 5. The extension will appear in your toolbar — click it to open the side panel
 
 ### Setting up your map
@@ -75,4 +88,10 @@ To update your map at any time, click **Edit setup** in the side panel header.
 
 ## Contributing
 
-Pull requests welcome. The entire app lives in `onboarding.html` — styles, markup, and logic are all self-contained to keep sharing frictionless.
+Pull requests welcome. The app is organized as:
+
+- **`onboarding.html`** — markup and CSS for the three-step setup UI
+- **`onboarding.js`** — JavaScript logic for state, render, and actions
+- **`sidepanel.html`** / **`sidepanel.js`** — Chrome extension side panel UI and graph rendering
+- **`storage.js`** — abstraction for persisting to `localStorage` or `chrome.storage.sync`
+- **`manifest.json`** — Chrome extension configuration
