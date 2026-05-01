@@ -12,8 +12,17 @@ jobs:
 
       - name: Zip extension
         run: |
-          cd ai-boundaries
-          zip -r ../ai-boundaries.zip . -x ".git*" "node_modules/*" ".DS_Store"
+          # Create a temp dir with just the extension files
+          mkdir -p release-staging
+          cp manifest.json onboarding.html onboarding.js sidepanel.html sidepanel.js storage.js background.js README.md release-staging/
+          mkdir -p release-staging/.github/workflows
+          cp .github/workflows/release.yml release-staging/.github/workflows/
+
+          # Zip it
+          cd release-staging
+          zip -r ../ai-boundaries.zip .
+          cd ..
+          ls -lh ai-boundaries.zip
 
       - name: Upload to release
         uses: softprops/action-gh-release@v1
