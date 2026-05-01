@@ -20,6 +20,7 @@ const BoundariesStorage = {
         x: Math.round(data.newChat.x * 1000) / 1000,
         y: Math.round(data.newChat.y * 1000) / 1000,
       } : null,
+      sycophancy: typeof data.sycophancy === 'number' ? data.sycophancy : 50,
     };
 
     if (typeof chrome !== 'undefined' && chrome.storage) {

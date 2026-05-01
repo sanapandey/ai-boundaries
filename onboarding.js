@@ -57,11 +57,39 @@ let state = {
   newChat: { ...NEW_CHAT_DOMAIN },
   selectedId: null,
   hoverPos: null,
+  sycophancy: 50,
 };
 
 // ═══════════════════════════════════════════════════
 // Markdown
 // ═══════════════════════════════════════════════════
+function sycophancyDescriptor(v) {
+  if (v <= 12)  return 'fully honest — willing to push back and disagree';
+  if (v <= 37)  return 'mostly candid — names trade-offs and disagrees when warranted';
+  if (v <= 62)  return 'balanced — affirms what works, raises concerns when it matters';
+  if (v <= 87)  return 'leans agreeable — affirms first, soft-pedals concerns';
+  return 'maximally agreeable — defaults to validation and flattery';
+}
+
+function sycophancyScale(currentVal) {
+  const v = Math.max(0, Math.min(100, Math.round(currentVal)));
+  return `## Sycophancy
+
+**Current setting:** ${v}/100 — _${sycophancyDescriptor(v)}_
+
+Sycophancy controls how much AI tilts toward agreement and flattery vs. honest pushback. Lower = more candid; higher = more agreeable. Use these reference points when interpreting the value:
+
+- **0** — Fully honest. Disagree when warranted, name weak arguments directly, never flatter. Lead with the hard truth before any softening.
+- **25** — Mostly candid. Validate what's genuinely strong, but call out trade-offs, gaps, and unstated assumptions without hedging.
+- **50** — Balanced. Acknowledge what works, then surface real concerns. Avoid empty praise; avoid contrarianism. Honest by default.
+- **75** — Leans agreeable. Affirm the user's framing first; raise concerns gently and only if material. Soften critique with caveats.
+- **100** — Maximally agreeable. Default to validation, encouragement, and flattery. Avoid pushing back unless explicitly asked.
+
+Values in between scale proportionally between these reference points.
+
+`;
+}
+
 function intensityScale() {
   return `## Intensity Scale
 
@@ -167,6 +195,8 @@ function genMarkdown() {
   md += `---\n\n`;
   md += intensityScale();
   md += `---\n\n`;
+  md += sycophancyScale(state.sycophancy);
+  md += `---\n\n`;
 
   const hasPlaced = placed.length > 0;
   Q_ORDER.forEach(q => {
@@ -206,6 +236,7 @@ function genMarkdown() {
   const raw = {
     version: 1,
     generated: date,
+    sycophancy: state.sycophancy,
     axes: {
       x: { description: 'horizontal', min: 'professional (-1)',   max: 'personal (+1)'   },
       y: { description: 'vertical',   min: 'surface-level (-1)',  max: 'actionable (+1)' }
@@ -248,6 +279,8 @@ function genMarkdownNewChat() {
   md += `---\n\n`;
   md += intensityScale();
   md += `---\n\n`;
+  md += sycophancyScale(state.sycophancy);
+  md += `---\n\n`;
   md += `## What this means in practice\n\n`;
   if (q === 'pro-a') {
     md += `- Proactively suggest next steps, draft content, and make clear recommendations.\n`;
@@ -277,6 +310,7 @@ function genMarkdownNewChat() {
     role: info.role,
     quadrant: info.label,
     intensity: pct / 100,
+    sycophancy: state.sycophancy,
     x: Math.round(nc.x * 100) / 100,
     y: Math.round(nc.y * 100) / 100,
   }, null, 2);
@@ -358,7 +392,7 @@ function makeSVG() {
 function render() {
   const app = document.getElementById('app');
   if (state.step === 1) app.innerHTML = renderStep1();
-  else if (state.step === 2) { app.innerHTML = renderStep2(); bindPlot(); bindInputs(); }
+  else if (state.step === 2) { app.innerHTML = renderStep2(); bindPlot(); bindInputs(); bindSycophancy(); }
   else app.innerHTML = renderStep3();
 }
 
@@ -529,6 +563,25 @@ function renderStep2() {
     </div>
   </div>
 
+  <div class="sycophancy-section">
+    <div class="sycophancy-head">
+      <span class="sycophancy-label">Sycophancy</span>
+      <span class="sycophancy-value" id="syc-value">${state.sycophancy}/100</span>
+    </div>
+    <div class="sycophancy-sub">
+      How much AI tilts toward agreement and flattery vs. honest pushback. Lower = more candid; higher = more agreeable.
+    </div>
+    <input type="range" min="0" max="100" step="1" value="${state.sycophancy}"
+      id="syc-slider" class="sycophancy-slider"
+      style="--syc-pct: ${state.sycophancy}%"
+      aria-label="Sycophancy level"/>
+    <div class="sycophancy-ticks">
+      <span>0 · Honest</span>
+      <span>50 · Balanced</span>
+      <span>100 · Agreeable</span>
+    </div>
+  </div>
+
   <div class="tray-section">
     <div class="tray-label">${unplaced.length > 0 ? 'Unplaced domains' : 'All placed'}</div>
     <div class="tray" id="tray">${trayChips}</div>
@@ -612,6 +665,21 @@ function bindInputs() {
   const inp = document.getElementById('new-domain-input');
   if (inp) inp.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') addCustom();
+  });
+}
+
+function bindSycophancy() {
+  const slider = document.getElementById('syc-slider');
+  const valEl  = document.getElementById('syc-value');
+  if (!slider) return;
+  slider.addEventListener('input', function() {
+    const v = parseInt(slider.value, 10);
+    state.sycophancy = v;
+    slider.style.setProperty('--syc-pct', v + '%');
+    if (valEl) valEl.textContent = v + '/100';
+  });
+  slider.addEventListener('change', function() {
+    persistState();
   });
 }
 
@@ -757,7 +825,11 @@ function addCustom() {
 }
 
 function persistState() {
-  BoundariesStorage.save({ domains: state.domains, newChat: state.newChat });
+  BoundariesStorage.save({
+    domains: state.domains,
+    newChat: state.newChat,
+    sycophancy: state.sycophancy,
+  });
 }
 
 function getMdContent() {
@@ -837,6 +909,9 @@ BoundariesStorage.load(function(saved) {
     if (saved.newChat) {
       state.newChat.x = saved.newChat.x;
       state.newChat.y = saved.newChat.y;
+    }
+    if (typeof saved.sycophancy === 'number') {
+      state.sycophancy = Math.max(0, Math.min(100, Math.round(saved.sycophancy)));
     }
   }
   render();
