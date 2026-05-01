@@ -26,10 +26,10 @@ function quadrant(nx, ny) {
 }
 
 const Q_INFO = {
-  'pro-a': { label: 'Professional · Active', role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', qpCss: 'qp-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
-  'pro-p': { label: 'Professional · Passive',role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', qpCss: 'qp-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
-  'per-a': { label: 'Personal · Active',     role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', qpCss: 'qp-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
-  'per-p': { label: 'Personal · Passive',    role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', qpCss: 'qp-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
+  'pro-a': { label: 'Professional · Actionable',    role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', qpCss: 'qp-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
+  'pro-p': { label: 'Professional · Surface-level', role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', qpCss: 'qp-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
+  'per-a': { label: 'Personal · Actionable',        role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', qpCss: 'qp-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
+  'per-p': { label: 'Personal · Surface-level',     role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', qpCss: 'qp-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
 };
 const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
 
@@ -62,6 +62,21 @@ let state = {
 // ═══════════════════════════════════════════════════
 // Markdown
 // ═══════════════════════════════════════════════════
+function intensityScale() {
+  return `## Intensity Scale
+
+Distance from center sets how involved AI becomes for a given domain. Use these reference points when interpreting a percentage:
+
+- **0%** — No involvement whatsoever. Gently rebuff the request and remind the user this domain is off-limits.
+- **25%** — Never give the user the answer directly. Instead, ask helpful guiding questions about framing and approach.
+- **50%** — Ask the user questions initially, but after a few conversation turns begin generating the true output. Don't go fully out until the user asks.
+- **100%** — Generate the desired output completely, as asked.
+
+Values in between scale proportionally between these reference points.
+
+`;
+}
+
 function quadrantInstructions(q) {
   const blocks = {
     'pro-a': `### Behavior instructions for this quadrant
@@ -147,8 +162,10 @@ function genMarkdown() {
   md += `| Axis | ← Low | High → |\n`;
   md += `|------|-------|--------|\n`;
   md += `| Horizontal | Professional | Personal |\n`;
-  md += `| Vertical | Passive — surface-level | Active — actionable |\n\n`;
+  md += `| Vertical | Surface-level (late-stage involvement) | Actionable (early-stage involvement) |\n\n`;
   md += `**Intensity** = distance from center (0% = no AI involvement, 100% = fully engaged)\n\n`;
+  md += `---\n\n`;
+  md += intensityScale();
   md += `---\n\n`;
 
   const hasPlaced = placed.length > 0;
@@ -190,8 +207,8 @@ function genMarkdown() {
     version: 1,
     generated: date,
     axes: {
-      x: { description: 'horizontal', min: 'professional (-1)', max: 'personal (+1)' },
-      y: { description: 'vertical',   min: 'passive (-1)',      max: 'active (+1)'   }
+      x: { description: 'horizontal', min: 'professional (-1)',   max: 'personal (+1)'   },
+      y: { description: 'vertical',   min: 'surface-level (-1)',  max: 'actionable (+1)' }
     },
     domains: state.domains.map(d => ({
       name:      d.name,
@@ -228,6 +245,8 @@ function genMarkdownNewChat() {
   md += `## Default Role: ${info.role}  *(${info.label})*\n\n`;
   md += `> ${roleDescs[q]}\n\n`;
   md += `**Intensity:** ${pct}% involvement\n\n`;
+  md += `---\n\n`;
+  md += intensityScale();
   md += `---\n\n`;
   md += `## What this means in practice\n\n`;
   if (q === 'pro-a') {
@@ -317,13 +336,13 @@ function makeSVG() {
   <text x="${rt + 10}"  y="${CY}" text-anchor="start" dominant-baseline="middle"
     font-size="12" font-weight="700" fill="#8b5cf6" font-family="Inter,system-ui">Personal</text>
   <text x="${CX}" y="${PT - 14}" text-anchor="middle"
-    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Active</text>
+    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Actionable</text>
   <text x="${CX}" y="${PT - 26}" text-anchor="middle"
-    font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(actionable)</text>
+    font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(early-stage involvement)</text>
   <text x="${CX}" y="${rb + 18}" text-anchor="middle" dominant-baseline="hanging"
-    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Passive</text>
+    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Surface-level</text>
   <text x="${CX}" y="${rb + 32}" text-anchor="middle" dominant-baseline="hanging"
-    font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(surface-level)</text>
+    font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(late-stage involvement)</text>
 
   <!-- Quadrant role labels -->
   <text x="${PL + 8}"   y="${PT + 15}" font-size="10.5" font-weight="600" fill="#3b82f6" opacity="0.65" font-family="Inter,system-ui">Co-pilot</text>
@@ -374,11 +393,11 @@ function renderStep1() {
       <div class="axis-card">
         <div class="axis-card-label">Vertical</div>
         <div class="axis-range">
-          <span style="color:#94a3b8">Passive</span>
+          <span style="color:#94a3b8">Surface-level</span>
           <div class="axis-bar"></div>
-          <span style="color:#334155">Active</span>
+          <span style="color:#334155">Actionable</span>
         </div>
-        <div class="axis-note">Passive = surfaces info &nbsp;·&nbsp; Active = gives recommendations</div>
+        <div class="axis-note">Surface-level = late-stage involvement &nbsp;·&nbsp; Actionable = early-stage involvement</div>
       </div>
     </div>
 
@@ -386,22 +405,22 @@ function renderStep1() {
     <div class="quadrant-preview" style="margin-bottom:22px">
       <div class="qp-cell qp-pa">
         <div class="qp-role">Co-pilot</div>
-        <div class="qp-desc">Professional · Active</div>
-        <div class="qp-detail">AI actively contributes to work tasks — drafting, decisions, code, and plans. You stay in charge, but AI is a direct collaborator rather than a passive tool.</div>
+        <div class="qp-desc">Professional · Actionable</div>
+        <div class="qp-detail">AI actively contributes to work tasks — drafting, decisions, code, and plans. You stay in charge, but AI is a direct collaborator rather than a surface-level tool.</div>
       </div>
       <div class="qp-cell qp-xa">
         <div class="qp-role">Coach</div>
-        <div class="qp-desc">Personal · Active</div>
+        <div class="qp-desc">Personal · Actionable</div>
         <div class="qp-detail">AI gives direct, concrete personal guidance — on habits, communication, or relationships. The highest-trust quadrant; use it intentionally and on your terms.</div>
       </div>
       <div class="qp-cell qp-pp">
         <div class="qp-role">Researcher</div>
-        <div class="qp-desc">Professional · Passive</div>
+        <div class="qp-desc">Professional · Surface-level</div>
         <div class="qp-detail">AI surfaces information, options, and trade-offs for work tasks. It informs but never decides — you evaluate and choose what to act on.</div>
       </div>
       <div class="qp-cell qp-xp">
         <div class="qp-role">Mirror</div>
-        <div class="qp-desc">Personal · Passive</div>
+        <div class="qp-desc">Personal · Surface-level</div>
         <div class="qp-detail">AI reflects observations and patterns back to you — gently, without pushing. Well-suited for journaling, self-reflection, and light emotional support.</div>
       </div>
     </div>
