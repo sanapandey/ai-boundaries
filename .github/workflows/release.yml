@@ -12,16 +12,12 @@ jobs:
 
       - name: Zip extension
         run: |
-          # Create a temp dir with just the extension files
-          mkdir -p release-staging
-          cp manifest.json onboarding.html onboarding.js sidepanel.html sidepanel.js storage.js background.js README.md release-staging/
-          mkdir -p release-staging/.github/workflows
-          cp .github/workflows/release.yml release-staging/.github/workflows/
-
+          # Copy the ai-boundaries folder and rename to ai-boundaries-release
+          cp -r ai-boundaries ai-boundaries-release
+          # Remove git/workflows from the copy
+          rm -rf ai-boundaries-release/.git ai-boundaries-release/.github
           # Zip it
-          cd release-staging
-          zip -r ../ai-boundaries.zip .
-          cd ..
+          zip -r ai-boundaries.zip ai-boundaries-release/
           ls -lh ai-boundaries.zip
 
       - name: Upload to release
