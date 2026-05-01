@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════
 // Constants
 // ═══════════════════════════════════════════════════
-const PL = 80, PT = 45, PR = 25, PB = 55;
-const CW = 400, CH = 400;
-const SW = PL + CW + PR;  // 505
+const PL = 100, PT = 45, PR = 70, PB = 55;
+const CW = 380, CH = 400;
+const SW = PL + CW + PR;  // 550
 const SH = PT + CH + PB;  // 500
 
 const CX = PL + CW / 2;   // center x px = 280
