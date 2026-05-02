@@ -12,13 +12,16 @@ jobs:
 
       - name: Zip extension
         run: |
-          # Copy the ai-boundaries folder and rename to ai-boundaries-release
-          cp -r ai-boundaries ai-boundaries-release
-          # Remove git/workflows from the copy
-          rm -rf ai-boundaries-release/.git ai-boundaries-release/.github
-          # Zip it
-          zip -r ai-boundaries.zip ai-boundaries-release/
-          ls -lh ai-boundaries.zip
+          # The repo root IS ai-boundaries, so list files to verify
+          echo "Files in current directory:"
+          ls -la
+
+          # Zip everything except .git and .github
+          zip -r ai-boundaries.zip . -x ".git/*" ".github/*" "*.zip"
+
+          # Verify contents
+          echo "ZIP contents:"
+          unzip -l ai-boundaries.zip | head -20
 
       - name: Upload to release
         uses: softprops/action-gh-release@v1
