@@ -256,6 +256,124 @@ function genMarkdown() {
   return md;
 }
 
+function genClaudeProfile() {
+  const placed = state.domains.filter(d => d.x !== null);
+  const nc     = state.newChat;
+  const v      = state.sycophancy;
+  const usedRoles = new Set();
+  const lines = [];
+
+  lines.push("I use a structured AI involvement framework. Apply these defaults to every response.");
+  lines.push("");
+
+  if (nc.x !== null) {
+    const q    = quadrant(nc.x, nc.y);
+    const info = Q_INFO[q];
+    const it   = intensity(nc.x, nc.y);
+    usedRoles.add(q);
+    lines.push(`DEFAULT ROLE for unspecified topics: ${info.role} (${info.label}) at ${it}% involvement.`);
+    lines.push("");
+  }
+
+  if (placed.length) {
+    lines.push("DOMAIN ROLES (apply when the topic matches):");
+    placed.forEach(d => {
+      const q    = quadrant(d.x, d.y);
+      const info = Q_INFO[q];
+      const it   = intensity(d.x, d.y);
+      usedRoles.add(q);
+      lines.push(`- ${d.name}: ${info.role} (${info.label}), ${it}%`);
+    });
+    lines.push("");
+  }
+
+  lines.push("INVOLVEMENT % (the number tells you how much to do):");
+  lines.push("- 0%: No involvement. Gently rebuff and remind me this domain is off-limits.");
+  lines.push("- 25%: Never give the answer directly. Ask helpful guiding questions about framing and approach.");
+  lines.push("- 50%: Ask questions first; after a few conversation turns begin generating the actual output. Don't go fully out until I ask.");
+  lines.push("- 100%: Generate the desired output completely, as asked.");
+  lines.push("Scale proportionally between these anchors.");
+  lines.push("");
+
+  lines.push(`SYCOPHANCY: ${v}/100 (${sycophancyDescriptor(v)}).`);
+  lines.push("Reference: 0 = fully honest, willing to push back; 25 = mostly candid; 50 = balanced; 75 = leans agreeable; 100 = maximally agreeable. Lower = more candid; higher = more flattering.");
+  lines.push("");
+
+  if (usedRoles.size > 0) {
+    lines.push("ROLE BEHAVIORS (only the ones I actually use):");
+    if (usedRoles.has('pro-a')) lines.push("- Co-pilot (Professional · Actionable): Take a position, make clear recommendations, be action-oriented.");
+    if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Surface-level): Surface information, options, and trade-offs without pushing a conclusion.");
+    if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Actionable): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
+    if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Surface-level): Don't give direct answers; respond with reflective prompts that turn the question back to me.");
+  }
+
+  return lines.join('\n');
+}
+
+function genChatGPTAboutMe() {
+  const placed = state.domains.filter(d => d.x !== null);
+  const nc     = state.newChat;
+  const lines  = [];
+
+  lines.push("I use a structured AI involvement framework with quadrant-based roles and percentage-based involvement levels.");
+  lines.push("");
+
+  if (nc.x !== null) {
+    const q    = quadrant(nc.x, nc.y);
+    const info = Q_INFO[q];
+    const it   = intensity(nc.x, nc.y);
+    lines.push(`Default role for any topic not specifically listed: ${info.role} (${info.label}) at ${it}% involvement.`);
+    lines.push("");
+  }
+
+  if (placed.length) {
+    lines.push("My domain-specific role assignments:");
+    placed.forEach(d => {
+      const q    = quadrant(d.x, d.y);
+      const info = Q_INFO[q];
+      const it   = intensity(d.x, d.y);
+      lines.push(`- ${d.name}: ${info.role} (${info.label}), ${it}%`);
+    });
+  }
+
+  return lines.join('\n');
+}
+
+function genChatGPTHowToRespond() {
+  const placed = state.domains.filter(d => d.x !== null);
+  const nc     = state.newChat;
+  const v      = state.sycophancy;
+  const usedRoles = new Set();
+  if (nc.x !== null) usedRoles.add(quadrant(nc.x, nc.y));
+  placed.forEach(d => usedRoles.add(quadrant(d.x, d.y)));
+
+  const lines = [];
+  lines.push("Apply these defaults to every response.");
+  lines.push("");
+
+  lines.push("INVOLVEMENT % (the number tells you how much to do):");
+  lines.push("- 0%: No involvement. Gently rebuff and remind me this domain is off-limits.");
+  lines.push("- 25%: Never give the answer directly. Ask helpful guiding questions about framing and approach.");
+  lines.push("- 50%: Ask questions first; after a few conversation turns begin generating the actual output.");
+  lines.push("- 100%: Generate the desired output completely, as asked.");
+  lines.push("Scale proportionally between these anchors.");
+  lines.push("");
+
+  lines.push(`SYCOPHANCY: ${v}/100 (${sycophancyDescriptor(v)}).`);
+  lines.push("Reference: 0 = fully honest, willing to push back; 100 = maximally agreeable. Lower = more candid; higher = more flattering.");
+  lines.push("");
+
+  if (usedRoles.size > 0) {
+    lines.push("ROLE BEHAVIORS (only the ones I actually use):");
+    if (usedRoles.has('pro-a')) lines.push("- Co-pilot (Professional · Actionable): Take a position, make clear recommendations, be action-oriented.");
+    if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Surface-level): Surface information and trade-offs without pushing a conclusion.");
+    if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Actionable): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
+    if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Surface-level): Don't give direct answers; respond with reflective prompts.");
+  }
+
+  return lines.join('\n');
+}
+
 function genMarkdownNewChat() {
   const date = new Date().toISOString().split('T')[0];
   const nc   = state.newChat;
@@ -389,11 +507,19 @@ function makeSVG() {
 // ═══════════════════════════════════════════════════
 // Render
 // ═══════════════════════════════════════════════════
+let lastRenderedStep = null;
+
 function render() {
+  const stepChanged = lastRenderedStep !== state.step;
+  lastRenderedStep = state.step;
   const app = document.getElementById('app');
   if (state.step === 1) app.innerHTML = renderStep1();
   else if (state.step === 2) { app.innerHTML = renderStep2(); bindPlot(); bindInputs(); bindSycophancy(); }
   else app.innerHTML = renderStep3();
+  if (stepChanged) {
+    const card = app.querySelector('.card');
+    if (card) card.classList.add('is-entering');
+  }
 }
 
 // ── Step 1 ───────────────────────────────────────
@@ -684,6 +810,153 @@ function bindSycophancy() {
 }
 
 // ── Step 3 ───────────────────────────────────────
+function renderActivateSection() {
+  return `
+    <div class="md-section-label" style="margin-top:26px">Where to put this</div>
+
+    <div class="activate-subhead">Account-wide settings <span class="activate-subhead-note">— auto-applied to every new chat, no per-conversation setup</span></div>
+    <div class="activate-cards">
+
+      <div class="activate-card">
+        <div class="activate-card-title">Claude · Personal preferences</div>
+        <div class="activate-card-desc">Single field, ~3,000-character limit. Most flexible of the lot.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-primary" data-action="copyprofile">Copy condensed text</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-claude">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-claude" hidden>
+          <ol>
+            <li>Open <a href="https://claude.ai/settings/profile" target="_blank" rel="noopener">claude.ai → Settings → Profile</a>.</li>
+            <li>Find "What personal preferences should Claude consider in responses?"</li>
+            <li>Paste the copied text and save.</li>
+          </ol>
+          <div class="activate-help-note">Condensed text includes the involvement-% anchors, sycophancy reference scale, and only the role behaviors you actually use.</div>
+        </div>
+      </div>
+
+      <div class="activate-card">
+        <div class="activate-card-title">ChatGPT · Custom Instructions</div>
+        <div class="activate-card-desc">Two fields, 1,500 chars each. The text is split naturally — copy each half separately.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-primary" data-action="copychatgpt" data-which="know">Copy "About me"</button>
+          <button class="btn btn-primary" data-action="copychatgpt" data-which="respond">Copy "How to respond"</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-chatgpt">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-chatgpt" hidden>
+          <ol>
+            <li>Open <a href="https://chatgpt.com/" target="_blank" rel="noopener">chatgpt.com</a> → Settings → Personalization → Custom Instructions.</li>
+            <li>Toggle <strong>Enable customization</strong> on.</li>
+            <li>Click <strong>Copy "About me"</strong> → paste into <em>"What would you like ChatGPT to know about you?"</em></li>
+            <li>Click <strong>Copy "How to respond"</strong> → paste into <em>"How would you like ChatGPT to respond?"</em></li>
+            <li>Save.</li>
+          </ol>
+          <div class="activate-help-note">Each ChatGPT field caps at 1,500 chars. The two-button split keeps each side comfortably under that.</div>
+        </div>
+      </div>
+
+      <div class="activate-card">
+        <div class="activate-card-title">Gemini · Personal context</div>
+        <div class="activate-card-desc">"Your instructions for Gemini" — applied to every chat. No published character limit.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-primary" data-action="copyprofile">Copy condensed text</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-gemini">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-gemini" hidden>
+          <ol>
+            <li>Open <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a>.</li>
+            <li>Click <strong>Settings &amp; help</strong> (bottom of the side rail) → <strong>Personal context</strong>.</li>
+            <li>Under <em>Your instructions for Gemini</em>, click <strong>Add +</strong>.</li>
+            <li>Paste the copied text and click Submit.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="activate-card">
+        <div class="activate-card-title">Perplexity · AI Profile</div>
+        <div class="activate-card-desc">Custom Instructions field, 1,500-char limit. May need light trimming for big domain lists.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-primary" data-action="copyprofile">Copy condensed text</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-perplexity">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-perplexity" hidden>
+          <ol>
+            <li>Open <a href="https://www.perplexity.ai/" target="_blank" rel="noopener">perplexity.ai</a>, click your profile icon (bottom-left) → <strong>Settings</strong>.</li>
+            <li>Go to <strong>Personalization</strong> → <strong>Custom Instructions</strong>.</li>
+            <li>Paste the copied text and save.</li>
+          </ol>
+          <div class="activate-help-note">If you bump the 1,500-char limit, easiest trim is dropping the role-behavior block — Perplexity will infer behavior from the role names.</div>
+        </div>
+      </div>
+
+      <div class="activate-card">
+        <div class="activate-card-title">DeepSeek <span class="activate-card-tag">no native profile</span></div>
+        <div class="activate-card-desc">DeepSeek's web app doesn't yet support persistent custom instructions. Two workarounds below.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-primary" data-action="copyprofile">Copy condensed text</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-deepseek">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-deepseek" hidden>
+          <ol>
+            <li><strong>Web app:</strong> Open <a href="https://chat.deepseek.com/" target="_blank" rel="noopener">chat.deepseek.com</a>, start a new chat, paste the copied text as your first message before asking your real question. Repeat for every new chat.</li>
+            <li><strong>API:</strong> Include the copied text as a <code>system</code> role message in every <code>/chat/completions</code> request.</li>
+          </ol>
+          <div class="activate-help-note">Persistent custom-instructions is on DeepSeek's open feature-request list (issue #1145). This card will get a one-click action when they ship it.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="activate-subhead">Per-project / per-workspace <span class="activate-subhead-note">— file-based, scoped to a project or repo</span></div>
+    <div class="activate-cards">
+
+      <div class="activate-card">
+        <div class="activate-card-title">Claude · Projects</div>
+        <div class="activate-card-desc">Every chat inside the project references this file as knowledge.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-outline" data-action="downloadmd">Download memory.md</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-project">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-project" hidden>
+          <ol>
+            <li>In claude.ai, open or create a Project.</li>
+            <li>Under <strong>Project knowledge</strong>, upload <code>memory.md</code>.</li>
+            <li>Every conversation in that project will reference these boundaries automatically.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="activate-card">
+        <div class="activate-card-title">Claude Code · CLAUDE.md</div>
+        <div class="activate-card-desc">Per-workspace. Goes at the root of a repo or project folder.</div>
+        <div class="activate-card-actions">
+          <button class="btn btn-outline" data-action="downloadclaudemd">Download CLAUDE.md</button>
+        </div>
+        <button class="activate-toggle" data-action="togglehelp" data-target="help-claudemd">
+          <span class="toggle-caret">▸</span> How to use
+        </button>
+        <div class="activate-help" id="help-claudemd" hidden>
+          <ol>
+            <li>Save the downloaded file as <code>CLAUDE.md</code> in your project root.</li>
+            <li>Claude Code (and other editors like Cursor) will read it automatically for sessions in that workspace.</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>`;
+}
+
 function renderStep3() {
   const nc = state.newChat;
 
@@ -714,14 +987,13 @@ function renderStep3() {
 
     <div class="md-section-label">memory.md preview <span style="font-weight:400;color:#64748b;font-size:10px;text-transform:none;letter-spacing:0">(editable)</span></div>
     <textarea class="md-textarea" id="md-textarea" spellcheck="false">${escH(md)}</textarea>
+
+    ${renderActivateSection()}
   </div>
 
   <div class="step-footer">
     <button class="btn btn-ghost" data-action="goto" data-step="2">← Edit</button>
-    <div class="export-btns">
-      <button class="btn btn-outline" id="copy-btn" data-action="copymd">Copy</button>
-      <button class="btn btn-primary" data-action="downloadmd">Download memory.md</button>
-    </div>
+    <button class="btn btn-outline" id="copy-btn" data-action="copymd">Copy memory.md</button>
   </div>
 </div>`;
   }
@@ -767,14 +1039,13 @@ function renderStep3() {
 
     <div class="md-section-label">memory.md preview <span style="font-weight:400;color:#64748b;font-size:10px;text-transform:none;letter-spacing:0">(editable)</span></div>
     <textarea class="md-textarea" id="md-textarea" spellcheck="false">${escH(md)}</textarea>
+
+    ${renderActivateSection()}
   </div>
 
   <div class="step-footer">
     <button class="btn btn-ghost" data-action="goto" data-step="2">← Edit</button>
-    <div class="export-btns">
-      <button class="btn btn-outline" id="copy-btn" data-action="copymd">Copy</button>
-      <button class="btn btn-primary" data-action="downloadmd">Download memory.md</button>
-    </div>
+    <button class="btn btn-outline" id="copy-btn" data-action="copymd">Copy memory.md</button>
   </div>
 </div>`;
 }
@@ -845,11 +1116,48 @@ function copyMd() {
 }
 
 function downloadMd() {
-  const blob = new Blob([getMdContent()], { type: 'text/markdown' });
+  downloadAs(getMdContent(), 'memory.md');
+}
+
+function downloadClaudeMd() {
+  downloadAs(getMdContent(), 'CLAUDE.md');
+}
+
+function downloadAs(content, filename) {
+  const blob = new Blob([content], { type: 'text/markdown' });
   const url  = URL.createObjectURL(blob);
-  const a    = Object.assign(document.createElement('a'), { href: url, download: 'memory.md' });
+  const a    = Object.assign(document.createElement('a'), { href: url, download: filename });
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function flashCopied(triggerEl, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (!triggerEl) return;
+    const orig = triggerEl.textContent;
+    triggerEl.textContent = 'Copied ✓';
+    setTimeout(() => { triggerEl.textContent = orig; }, 1800);
+  });
+}
+
+function copyProfile(triggerEl) {
+  flashCopied(triggerEl, genClaudeProfile());
+}
+
+function copyChatGPT(triggerEl) {
+  if (!triggerEl) return;
+  const which = triggerEl.dataset.which;
+  const text  = which === 'know' ? genChatGPTAboutMe() : genChatGPTHowToRespond();
+  flashCopied(triggerEl, text);
+}
+
+function toggleHelp(triggerEl) {
+  if (!triggerEl) return;
+  const id = triggerEl.dataset.target;
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  panel.hidden = !panel.hidden;
+  triggerEl.classList.toggle('expanded', !panel.hidden);
 }
 
 // ═══════════════════════════════════════════════════
@@ -890,6 +1198,14 @@ document.addEventListener('click', function(e) {
     copyMd();
   } else if (action === 'downloadmd') {
     downloadMd();
+  } else if (action === 'downloadclaudemd') {
+    downloadClaudeMd();
+  } else if (action === 'copyprofile') {
+    copyProfile(target);
+  } else if (action === 'copychatgpt') {
+    copyChatGPT(target);
+  } else if (action === 'togglehelp') {
+    toggleHelp(target);
   }
 });
 
