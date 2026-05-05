@@ -49,6 +49,7 @@ const PRESETS = [
   { id:'relationship-advice',   name:'Relationship Advice',  cat:'per', suggestedQ:'per-p' },
   { id:'dating-advice',         name:'Dating Advice',        cat:'per', suggestedQ:'per-p' },
   { id:'family-relationships',  name:'Family Relationships', cat:'per', suggestedQ:'per-p' },
+  { id:'spirituality',          name:'Spirituality',         cat:'per', suggestedQ:'per-p' },
 ];
 
 let state = {
