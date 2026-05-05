@@ -50,6 +50,12 @@ const PRESETS = [
   { id:'dating-advice',         name:'Dating Advice',        cat:'per', suggestedQ:'per-p' },
   { id:'family-relationships',  name:'Family Relationships', cat:'per', suggestedQ:'per-p' },
   { id:'spirituality',          name:'Spirituality',         cat:'per', suggestedQ:'per-p' },
+  { id:'personal-development',  name:'Personal Development', cat:'per', suggestedQ:'per-a' },
+  { id:'financial-planning',    name:'Financial Planning',   cat:'pro', suggestedQ:'pro-p' },
+  { id:'legal-matters',         name:'Legal Matters',        cat:'pro', suggestedQ:'pro-p' },
+  { id:'health-wellness',       name:'Health & Wellness',    cat:'per', suggestedQ:'per-a' },
+  { id:'parenting',             name:'Parenting',            cat:'per', suggestedQ:'per-p' },
+  { id:'ethics',                name:'Ethics',               cat:'per', suggestedQ:'per-p' },
 ];
 
 let state = {
