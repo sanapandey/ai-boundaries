@@ -9,7 +9,7 @@ The app walks you through three steps:
 1. **Pick your domains** — choose from a preset list of professional and personal areas (coding, writing, finance, health, etc.) or add your own.
 2. **Place them on a map** — drag each domain onto a 2-axis plot:
    - **X-axis**: Professional ↔ Personal
-   - **Y-axis**: Active (you lead) ↔ Passive (AI leads)
+   - **Y-axis**: Planning (early-stage involvement) ↔ Polishing (late-stage involvement)
    - The further from center, the stronger the preference.
 3. **Export `memory.md`** — generates a structured Markdown file summarising your AI boundary settings. Place it in the root of any project and reference it in your AI system prompt so the assistant knows where you want more or less involvement.
 

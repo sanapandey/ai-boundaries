@@ -64,8 +64,8 @@ function drawGraph(data) {
     <circle cx="${CX}" cy="${CY}" r="2.5" fill="#e2e8f0"/>
     <text x="${PAD-4}" y="${CY}" text-anchor="end" dominant-baseline="middle" font-size="8" font-weight="700" fill="#3b82f6">Pro</text>
     <text x="${PAD+SIZE+4}" y="${CY}" text-anchor="start" dominant-baseline="middle" font-size="8" font-weight="700" fill="#8b5cf6">Per</text>
-    <text x="${CX}" y="${PAD-6}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Active</text>
-    <text x="${CX}" y="${PAD+SIZE+14}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Passive</text>
+    <text x="${CX}" y="${PAD-6}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Planning</text>
+    <text x="${CX}" y="${PAD+SIZE+14}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Polishing</text>
     <text x="${PAD+4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#3b82f6" opacity="0.7">Co-pilot</text>
     <text x="${PAD+SIZE-4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#7c3aed" opacity="0.7" text-anchor="end">Coach</text>
     <text x="${PAD+4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#15803d" opacity="0.7">Researcher</text>

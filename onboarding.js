@@ -26,10 +26,10 @@ function quadrant(nx, ny) {
 }
 
 const Q_INFO = {
-  'pro-a': { label: 'Professional · Actionable',    role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', qpCss: 'qp-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
-  'pro-p': { label: 'Professional · Surface-level', role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', qpCss: 'qp-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
-  'per-a': { label: 'Personal · Actionable',        role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', qpCss: 'qp-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
-  'per-p': { label: 'Personal · Surface-level',     role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', qpCss: 'qp-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
+  'pro-a': { label: 'Professional · Planning',  role: 'Co-pilot',   desc: 'Concrete recommendations on work tasks',       css: 'qc-pa', chipCss: 'cq-pa', qpCss: 'qp-pa', svgFill: '#eff6ff', svgStroke:'#bfdbfe' },
+  'pro-p': { label: 'Professional · Polishing', role: 'Researcher', desc: 'Surfaces information, you decide',             css: 'qc-pp', chipCss: 'cq-pp', qpCss: 'qp-pp', svgFill: '#f0fdf4', svgStroke:'#bbf7d0' },
+  'per-a': { label: 'Personal · Planning',      role: 'Coach',      desc: 'Concrete personal guidance — use intentionally',css: 'qc-xa', chipCss: 'cq-xa', qpCss: 'qp-xa', svgFill: '#f5f3ff', svgStroke:'#ddd6fe' },
+  'per-p': { label: 'Personal · Polishing',     role: 'Mirror',     desc: 'Gentle reflection, light touch',               css: 'qc-xp', chipCss: 'cq-xp', qpCss: 'qp-xp', svgFill: '#fffbeb', svgStroke:'#fde68a' },
 };
 const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
 
@@ -190,7 +190,7 @@ function genMarkdown() {
   md += `| Axis | ← Low | High → |\n`;
   md += `|------|-------|--------|\n`;
   md += `| Horizontal | Professional | Personal |\n`;
-  md += `| Vertical | Surface-level (late-stage involvement) | Actionable (early-stage involvement) |\n\n`;
+  md += `| Vertical | Polishing (late-stage involvement) | Planning (early-stage involvement) |\n\n`;
   md += `**Intensity** = distance from center (0% = no AI involvement, 100% = fully engaged)\n\n`;
   md += `---\n\n`;
   md += intensityScale();
@@ -239,7 +239,7 @@ function genMarkdown() {
     sycophancy: state.sycophancy,
     axes: {
       x: { description: 'horizontal', min: 'professional (-1)',   max: 'personal (+1)'   },
-      y: { description: 'vertical',   min: 'surface-level (-1)',  max: 'actionable (+1)' }
+      y: { description: 'vertical',   min: 'polishing (-1)',      max: 'planning (+1)'   }
     },
     domains: state.domains.map(d => ({
       name:      d.name,
@@ -301,10 +301,10 @@ function genClaudeProfile() {
 
   if (usedRoles.size > 0) {
     lines.push("ROLE BEHAVIORS (only the ones I actually use):");
-    if (usedRoles.has('pro-a')) lines.push("- Co-pilot (Professional · Actionable): Take a position, make clear recommendations, be action-oriented.");
-    if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Surface-level): Surface information, options, and trade-offs without pushing a conclusion.");
-    if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Actionable): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
-    if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Surface-level): Don't give direct answers; respond with reflective prompts that turn the question back to me.");
+    if (usedRoles.has('pro-a')) lines.push("- Co-pilot (Professional · Planning): Take a position, make clear recommendations, be action-oriented.");
+    if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Polishing): Surface information, options, and trade-offs without pushing a conclusion.");
+    if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Planning): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
+    if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Polishing): Don't give direct answers; respond with reflective prompts that turn the question back to me.");
   }
 
   return lines.join('\n');
@@ -365,10 +365,10 @@ function genChatGPTHowToRespond() {
 
   if (usedRoles.size > 0) {
     lines.push("ROLE BEHAVIORS (only the ones I actually use):");
-    if (usedRoles.has('pro-a')) lines.push("- Co-pilot (Professional · Actionable): Take a position, make clear recommendations, be action-oriented.");
-    if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Surface-level): Surface information and trade-offs without pushing a conclusion.");
-    if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Actionable): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
-    if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Surface-level): Don't give direct answers; respond with reflective prompts.");
+    if (usedRoles.has('pro-a')) lines.push("- Co-pilot (Professional · Planning): Take a position, make clear recommendations, be action-oriented.");
+    if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Polishing): Surface information and trade-offs without pushing a conclusion.");
+    if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Planning): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
+    if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Polishing): Don't give direct answers; respond with reflective prompts.");
   }
 
   return lines.join('\n');
@@ -488,11 +488,11 @@ function makeSVG() {
   <text x="${rt + 10}"  y="${CY}" text-anchor="start" dominant-baseline="middle"
     font-size="12" font-weight="700" fill="#8b5cf6" font-family="Inter,system-ui">Personal</text>
   <text x="${CX}" y="${PT - 14}" text-anchor="middle"
-    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Actionable</text>
+    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Planning</text>
   <text x="${CX}" y="${PT - 26}" text-anchor="middle"
     font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(early-stage involvement)</text>
   <text x="${CX}" y="${rb + 18}" text-anchor="middle" dominant-baseline="hanging"
-    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Surface-level</text>
+    font-size="12" font-weight="700" fill="#334155" font-family="Inter,system-ui">Polishing</text>
   <text x="${CX}" y="${rb + 32}" text-anchor="middle" dominant-baseline="hanging"
     font-size="9.5" fill="#94a3b8" font-family="Inter,system-ui">(late-stage involvement)</text>
 
@@ -553,11 +553,11 @@ function renderStep1() {
       <div class="axis-card">
         <div class="axis-card-label">Vertical</div>
         <div class="axis-range">
-          <span style="color:#94a3b8">Surface-level</span>
+          <span style="color:#94a3b8">Polishing</span>
           <div class="axis-bar"></div>
-          <span style="color:#334155">Actionable</span>
+          <span style="color:#334155">Planning</span>
         </div>
-        <div class="axis-note">Surface-level = late-stage involvement &nbsp;·&nbsp; Actionable = early-stage involvement</div>
+        <div class="axis-note">Polishing = late-stage involvement &nbsp;·&nbsp; Planning = early-stage involvement</div>
       </div>
     </div>
 
@@ -565,22 +565,22 @@ function renderStep1() {
     <div class="quadrant-preview" style="margin-bottom:22px">
       <div class="qp-cell qp-pa">
         <div class="qp-role">Co-pilot</div>
-        <div class="qp-desc">Professional · Actionable</div>
+        <div class="qp-desc">Professional · Planning</div>
         <div class="qp-detail">AI actively contributes to work tasks — drafting, decisions, code, and plans. You stay in charge, but AI is a direct collaborator rather than a surface-level tool.</div>
       </div>
       <div class="qp-cell qp-xa">
         <div class="qp-role">Coach</div>
-        <div class="qp-desc">Personal · Actionable</div>
+        <div class="qp-desc">Personal · Planning</div>
         <div class="qp-detail">AI gives direct, concrete personal guidance — on habits, communication, or relationships. The highest-trust quadrant; use it intentionally and on your terms.</div>
       </div>
       <div class="qp-cell qp-pp">
         <div class="qp-role">Researcher</div>
-        <div class="qp-desc">Professional · Surface-level</div>
+        <div class="qp-desc">Professional · Polishing</div>
         <div class="qp-detail">AI surfaces information, options, and trade-offs for work tasks. It informs but never decides — you evaluate and choose what to act on.</div>
       </div>
       <div class="qp-cell qp-xp">
         <div class="qp-role">Mirror</div>
-        <div class="qp-desc">Personal · Surface-level</div>
+        <div class="qp-desc">Personal · Polishing</div>
         <div class="qp-detail">AI reflects observations and patterns back to you — gently, without pushing. Well-suited for journaling, self-reflection, and light emotional support.</div>
       </div>
     </div>
