@@ -5,13 +5,15 @@ const Q_INFO = {
   'per-p': { role:'Mirror',     roleClass:'role-xp', dotClass:'dot-xp' },
 };
 
-const PAD = 30, SIZE = 200;
-const CX = PAD + SIZE / 2, CY = PAD + SIZE / 2;
+const PAD_X = 65, PAD_Y = 30, SIZE = 200;
+const VB_W  = PAD_X * 2 + SIZE;   // 330
+const VB_H  = PAD_Y * 2 + SIZE;   // 260
+const CX = PAD_X + SIZE / 2, CY = PAD_Y + SIZE / 2;
 
 function n2p(nx, ny) {
   return {
-    x: PAD + (nx + 1) / 2 * SIZE,
-    y: PAD + (1 - ny) / 2 * SIZE,
+    x: PAD_X + (nx + 1) / 2 * SIZE,
+    y: PAD_Y + (1 - ny) / 2 * SIZE,
   };
 }
 
@@ -43,33 +45,33 @@ function drawGraph(data) {
     dots += `<circle cx="${x}" cy="${y}" r="7" fill="#f59e0b" opacity="0.9" stroke="#fff" stroke-width="2"/>`;
   }
 
-  container.innerHTML = `<svg viewBox="0 0 260 260" width="100%" height="260" xmlns="http://www.w3.org/2000/svg">
+  container.innerHTML = `<svg viewBox="0 0 ${VB_W} ${VB_H}" width="100%" height="${VB_H}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <clipPath id="clip">
-        <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}"/>
+        <rect x="${PAD_X}" y="${PAD_Y}" width="${SIZE}" height="${SIZE}"/>
       </clipPath>
     </defs>
-    <rect x="${PAD}" y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#eff6ff" opacity="0.7"/>
-    <rect x="${CX}"  y="${PAD}" width="${SIZE/2}" height="${SIZE/2}" fill="#f5f3ff" opacity="0.7"/>
-    <rect x="${PAD}" y="${CY}"  width="${SIZE/2}" height="${SIZE/2}" fill="#f0fdf4" opacity="0.7"/>
-    <rect x="${CX}"  y="${CY}"  width="${SIZE/2}" height="${SIZE/2}" fill="#fffbeb" opacity="0.7"/>
+    <rect x="${PAD_X}" y="${PAD_Y}" width="${SIZE/2}" height="${SIZE/2}" fill="#eff6ff" opacity="0.7"/>
+    <rect x="${CX}"    y="${PAD_Y}" width="${SIZE/2}" height="${SIZE/2}" fill="#f5f3ff" opacity="0.7"/>
+    <rect x="${PAD_X}" y="${CY}"    width="${SIZE/2}" height="${SIZE/2}" fill="#f0fdf4" opacity="0.7"/>
+    <rect x="${CX}"    y="${CY}"    width="${SIZE/2}" height="${SIZE/2}" fill="#fffbeb" opacity="0.7"/>
     <g clip-path="url(#clip)" opacity="0.12">
       <circle cx="${CX}" cy="${CY}" r="${r75}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
       <circle cx="${CX}" cy="${CY}" r="${r50}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
       <circle cx="${CX}" cy="${CY}" r="${r25}" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
     </g>
-    <line x1="${PAD}" y1="${CY}" x2="${PAD+SIZE}" y2="${CY}" stroke="#d1d5db" stroke-width="1"/>
-    <line x1="${CX}" y1="${PAD}" x2="${CX}" y2="${PAD+SIZE}" stroke="#d1d5db" stroke-width="1"/>
-    <rect x="${PAD}" y="${PAD}" width="${SIZE}" height="${SIZE}" fill="none" stroke="#e2e8f0" stroke-width="1" rx="2"/>
+    <line x1="${PAD_X}" y1="${CY}" x2="${PAD_X+SIZE}" y2="${CY}" stroke="#d1d5db" stroke-width="1"/>
+    <line x1="${CX}" y1="${PAD_Y}" x2="${CX}" y2="${PAD_Y+SIZE}" stroke="#d1d5db" stroke-width="1"/>
+    <rect x="${PAD_X}" y="${PAD_Y}" width="${SIZE}" height="${SIZE}" fill="none" stroke="#e2e8f0" stroke-width="1" rx="2"/>
     <circle cx="${CX}" cy="${CY}" r="2.5" fill="#e2e8f0"/>
-    <text x="${PAD-4}" y="${CY}" text-anchor="end" dominant-baseline="middle" font-size="8" font-weight="700" fill="#3b82f6">Pro</text>
-    <text x="${PAD+SIZE+4}" y="${CY}" text-anchor="start" dominant-baseline="middle" font-size="8" font-weight="700" fill="#8b5cf6">Per</text>
-    <text x="${CX}" y="${PAD-6}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Planning</text>
-    <text x="${CX}" y="${PAD+SIZE+14}" text-anchor="middle" font-size="8" font-weight="700" fill="#334155">Polishing</text>
-    <text x="${PAD+4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#3b82f6" opacity="0.7">Co-pilot</text>
-    <text x="${PAD+SIZE-4}" y="${PAD+11}" font-size="7" font-weight="600" fill="#7c3aed" opacity="0.7" text-anchor="end">Coach</text>
-    <text x="${PAD+4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#15803d" opacity="0.7">Researcher</text>
-    <text x="${PAD+SIZE-4}" y="${PAD+SIZE-5}" font-size="7" font-weight="600" fill="#b45309" opacity="0.7" text-anchor="end">Mirror</text>
+    <text x="${PAD_X-4}" y="${CY}" text-anchor="end" dominant-baseline="middle" font-size="9" font-weight="700" fill="#3b82f6">Professional</text>
+    <text x="${PAD_X+SIZE+4}" y="${CY}" text-anchor="start" dominant-baseline="middle" font-size="9" font-weight="700" fill="#8b5cf6">Personal</text>
+    <text x="${CX}" y="${PAD_Y-6}" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">Planning</text>
+    <text x="${CX}" y="${PAD_Y+SIZE+14}" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">Polishing</text>
+    <text x="${PAD_X+4}" y="${PAD_Y+11}" font-size="8" font-weight="600" fill="#3b82f6" opacity="0.7">Co-pilot</text>
+    <text x="${PAD_X+SIZE-4}" y="${PAD_Y+11}" font-size="8" font-weight="600" fill="#7c3aed" opacity="0.7" text-anchor="end">Coach</text>
+    <text x="${PAD_X+4}" y="${PAD_Y+SIZE-5}" font-size="8" font-weight="600" fill="#15803d" opacity="0.7">Researcher</text>
+    <text x="${PAD_X+SIZE-4}" y="${PAD_Y+SIZE-5}" font-size="8" font-weight="600" fill="#b45309" opacity="0.7" text-anchor="end">Mirror</text>
     <g clip-path="url(#clip)">${dots}</g>
   </svg>`;
 }
