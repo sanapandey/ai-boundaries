@@ -173,6 +173,7 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 6px;
   margin-bottom: 22px;
+  align-items: start;
 }
 .qp-cell {
   border-radius: 9px;
@@ -186,6 +187,56 @@ body {
 .qp-pp { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
 .qp-xa { background:#f5f3ff; border-color:#ddd6fe; color:#6d28d9; }
 .qp-xp { background:#fffbeb; border-color:#fde68a; color:#b45309; }
+
+.qp-example-toggle {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 4px 0 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  opacity: 0.6;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.15s;
+}
+.qp-example-toggle:hover { opacity: 1; }
+.qp-example-toggle .toggle-caret {
+  display: inline-block;
+  transition: transform 0.15s;
+  font-size: 9px;
+}
+.qp-example-toggle.expanded .toggle-caret { transform: rotate(90deg); }
+.qp-example[hidden] { display: none; }
+.qp-example {
+  margin-top: 8px;
+  padding: 9px 11px;
+  background: rgba(255,255,255,0.75);
+  border-radius: 6px;
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: #334155;
+}
+.qp-example-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+  margin-bottom: 2px;
+}
+.qp-example-prompt {
+  font-style: italic;
+  color: #475569;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.qp-example-response { color: #334155; }
 
 .domain-pills {
   display: flex;

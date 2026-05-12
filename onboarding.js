@@ -33,6 +33,22 @@ const Q_INFO = {
 };
 const Q_ORDER = ['pro-a', 'pro-p', 'per-a', 'per-p'];
 
+// Shared calibration example — one prompt, four role responses.
+const EXAMPLE_PROMPT = "I'm thinking about leaving my job. What should I do?";
+const EXAMPLE_RESPONSES = {
+  'pro-a': "Here's a 14-day plan: draft your resignation letter and save it, polish your resume tonight, and book 3 informational chats with people in target roles by Friday. Set a firm decision deadline two weeks out — open-ended deliberation will just stretch the discomfort.",
+  'pro-p': "A few axes to weigh before deciding: financial runway, whether the issue is the role / team / company, and what the current market looks like for your function. Each one points toward a different next move — I can pull a deeper view on any of them.",
+  'per-a': "It sounds like the energy you used to have for this work is gone. Schedule a 30-minute chat with someone you trust who left a job recently and ask what they wish they'd done differently. Sit with the answer for a week before deciding.",
+  'per-p': "Before answering 'should I leave,' what would help more — getting clearer on what you'd be leaving toward, or on what's making it hard to stay? Take a walk this evening and let that settle, then come back to the question.",
+};
+// Compact role-shape descriptions used in the Claude profile / ChatGPT split where char budget is tight.
+const EXAMPLE_SHAPES = {
+  'pro-a': "14-day action plan with concrete tasks and a firm decision deadline.",
+  'pro-p': "surfaces the key axes (financial runway, role/team/company fit, market) without picking one.",
+  'per-a': "names the pattern (\"your energy is gone\"), suggests one clarifying step, defers the decision a week.",
+  'per-p': "turns the question back (\"what would help more — clarity on leaving toward what, or what's hard to stay?\").",
+};
+
 // ═══════════════════════════════════════════════════
 // State
 // ═══════════════════════════════════════════════════
@@ -95,6 +111,29 @@ Sycophancy controls how much AI tilts toward agreement and flattery vs. honest p
 Values in between scale proportionally between these reference points.
 
 `;
+}
+
+function roleExamplesMarkdown() {
+  let md = `## Example Responses\n\n`;
+  md += `For calibration, here's the same user prompt answered four different ways — one per role. The further from center a domain sits, the more pronounced this style should be.\n\n`;
+  md += `> _User asks:_ "${EXAMPLE_PROMPT}"\n\n`;
+  Q_ORDER.forEach(q => {
+    const info = Q_INFO[q];
+    md += `### ${info.role}  *(${info.label})*\n\n`;
+    md += `${EXAMPLE_RESPONSES[q]}\n\n`;
+  });
+  return md;
+}
+
+function roleExamplesCompact() {
+  const lines = [];
+  lines.push("EXAMPLE RESPONSE SHAPES (calibration — same user prompt, four role styles):");
+  lines.push(`Prompt: "${EXAMPLE_PROMPT}"`);
+  Q_ORDER.forEach(q => {
+    const info = Q_INFO[q];
+    lines.push(`- ${info.role}: ${EXAMPLE_SHAPES[q]}`);
+  });
+  return lines.join('\n');
 }
 
 function intensityScale() {
@@ -204,6 +243,8 @@ function genMarkdown() {
   md += `---\n\n`;
   md += sycophancyScale(state.sycophancy);
   md += `---\n\n`;
+  md += roleExamplesMarkdown();
+  md += `---\n\n`;
 
   const hasPlaced = placed.length > 0;
   Q_ORDER.forEach(q => {
@@ -312,7 +353,10 @@ function genClaudeProfile() {
     if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Polishing): Surface information, options, and trade-offs without pushing a conclusion.");
     if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Planning): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
     if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Polishing): Don't give direct answers; respond with reflective prompts that turn the question back to me.");
+    lines.push("");
   }
+
+  lines.push(roleExamplesCompact());
 
   return lines.join('\n');
 }
@@ -376,7 +420,10 @@ function genChatGPTHowToRespond() {
     if (usedRoles.has('pro-p')) lines.push("- Researcher (Professional · Polishing): Surface information and trade-offs without pushing a conclusion.");
     if (usedRoles.has('per-a')) lines.push("- Coach (Personal · Planning): Give direct, honest personal guidance; name patterns; suggest concrete next steps.");
     if (usedRoles.has('per-p')) lines.push("- Mirror (Personal · Polishing): Don't give direct answers; respond with reflective prompts.");
+    lines.push("");
   }
+
+  lines.push(roleExamplesCompact());
 
   return lines.join('\n');
 }
@@ -405,6 +452,8 @@ function genMarkdownNewChat() {
   md += intensityScale();
   md += `---\n\n`;
   md += sycophancyScale(state.sycophancy);
+  md += `---\n\n`;
+  md += roleExamplesMarkdown();
   md += `---\n\n`;
   md += `## What this means in practice\n\n`;
   if (q === 'pro-a') {
@@ -574,21 +623,57 @@ function renderStep1() {
         <div class="qp-role">Co-pilot</div>
         <div class="qp-desc">Professional · Planning</div>
         <div class="qp-detail">AI actively contributes to work tasks — drafting, decisions, code, and plans. You stay in charge, but AI is a direct collaborator rather than a surface-level tool.</div>
+        <button class="qp-example-toggle" data-action="togglehelp" data-target="qp-ex-pa">
+          <span class="toggle-caret">▸</span> Show example
+        </button>
+        <div class="qp-example" id="qp-ex-pa" hidden>
+          <div class="qp-example-label">User asks:</div>
+          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
+          <div class="qp-example-label">Co-pilot replies:</div>
+          <div class="qp-example-response">${EXAMPLE_RESPONSES['pro-a']}</div>
+        </div>
       </div>
       <div class="qp-cell qp-xa">
         <div class="qp-role">Coach</div>
         <div class="qp-desc">Personal · Planning</div>
         <div class="qp-detail">AI gives direct, concrete personal guidance — on habits, communication, or relationships. The highest-trust quadrant; use it intentionally and on your terms.</div>
+        <button class="qp-example-toggle" data-action="togglehelp" data-target="qp-ex-xa">
+          <span class="toggle-caret">▸</span> Show example
+        </button>
+        <div class="qp-example" id="qp-ex-xa" hidden>
+          <div class="qp-example-label">User asks:</div>
+          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
+          <div class="qp-example-label">Coach replies:</div>
+          <div class="qp-example-response">${EXAMPLE_RESPONSES['per-a']}</div>
+        </div>
       </div>
       <div class="qp-cell qp-pp">
         <div class="qp-role">Researcher</div>
         <div class="qp-desc">Professional · Polishing</div>
         <div class="qp-detail">AI surfaces information, options, and trade-offs for work tasks. It informs but never decides — you evaluate and choose what to act on.</div>
+        <button class="qp-example-toggle" data-action="togglehelp" data-target="qp-ex-pp">
+          <span class="toggle-caret">▸</span> Show example
+        </button>
+        <div class="qp-example" id="qp-ex-pp" hidden>
+          <div class="qp-example-label">User asks:</div>
+          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
+          <div class="qp-example-label">Researcher replies:</div>
+          <div class="qp-example-response">${EXAMPLE_RESPONSES['pro-p']}</div>
+        </div>
       </div>
       <div class="qp-cell qp-xp">
         <div class="qp-role">Mirror</div>
         <div class="qp-desc">Personal · Polishing</div>
         <div class="qp-detail">AI reflects observations and patterns back to you — gently, without pushing. Well-suited for journaling, self-reflection, and light emotional support.</div>
+        <button class="qp-example-toggle" data-action="togglehelp" data-target="qp-ex-xp">
+          <span class="toggle-caret">▸</span> Show example
+        </button>
+        <div class="qp-example" id="qp-ex-xp" hidden>
+          <div class="qp-example-label">User asks:</div>
+          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
+          <div class="qp-example-label">Mirror replies:</div>
+          <div class="qp-example-response">${EXAMPLE_RESPONSES['per-p']}</div>
+        </div>
       </div>
     </div>
 
