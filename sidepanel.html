@@ -124,6 +124,236 @@ body {
   border-bottom: 1px solid #fef3c7;
 }
 .new-chat-label { font-size: 10px; font-weight: 700; color: #92400e; }
+
+/* ── Feedback / flag sections ── */
+.fb-section {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  margin-top: 14px;
+  overflow: hidden;
+}
+.fb-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  color: #1e293b;
+  text-align: left;
+}
+.fb-toggle:hover { background: #f8fafc; }
+.fb-toggle .fb-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6366f1;
+  background: #eef2ff;
+  border-radius: 10px;
+  padding: 2px 7px;
+  margin-left: 6px;
+}
+.fb-toggle .fb-caret {
+  font-size: 10px;
+  color: #94a3b8;
+  transition: transform 0.18s ease;
+}
+.fb-toggle.is-open .fb-caret { transform: rotate(180deg); }
+.fb-body {
+  padding: 0 14px 14px;
+  border-top: 1px solid #f1f5f9;
+}
+.fb-body[hidden] { display: none; }
+
+/* ── Flag-a-response form ── */
+.flag-field { margin-top: 12px; }
+.flag-field-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 5px;
+  display: block;
+}
+.flag-field select,
+.flag-field input[type="text"],
+.flag-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 12px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #1e293b;
+  resize: vertical;
+}
+.flag-field textarea { min-height: 80px; line-height: 1.4; }
+.flag-field select:focus,
+.flag-field input:focus,
+.flag-field textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+
+.flag-radio-group { display: flex; flex-direction: column; gap: 5px; }
+.flag-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.flag-radio:hover { background: #f8fafc; border-color: #cbd5e1; }
+.flag-radio input { margin-top: 2px; flex-shrink: 0; }
+.flag-radio input:checked + span { font-weight: 600; }
+
+.flag-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+.flag-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.flag-btn-primary { background: #6366f1; color: #fff; }
+.flag-btn-primary:hover { background: #4f46e5; }
+.flag-btn-primary:disabled { background: #c7d2fe; cursor: not-allowed; }
+.flag-btn-ghost { background: transparent; color: #64748b; border-color: #e2e8f0; }
+.flag-btn-ghost:hover { background: #f8fafc; }
+
+.flag-error {
+  font-size: 11px;
+  color: #b91c1c;
+  margin-top: 6px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 6px 9px;
+  border-radius: 6px;
+}
+.flag-error[hidden] { display: none; }
+
+.flag-ok {
+  font-size: 11px;
+  color: #166534;
+  margin-top: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 6px 9px;
+  border-radius: 6px;
+}
+.flag-ok[hidden] { display: none; }
+
+/* ── Pending / consolidated list items ── */
+.fb-item {
+  margin-top: 10px;
+  padding: 10px 11px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  position: relative;
+}
+.fb-item-domain {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.fb-item-misc {
+  font-size: 10.5px;
+  color: #6366f1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.fb-item-snippet {
+  font-size: 11.5px;
+  color: #475569;
+  margin-top: 6px;
+  line-height: 1.45;
+  font-style: italic;
+}
+.fb-item-notes {
+  font-size: 11.5px;
+  color: #334155;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+.fb-item-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.fb-item-remove:hover { background: #fee2e2; color: #b91c1c; }
+
+.fb-item-consolidated {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.fb-item-consolidated .fb-item-insight {
+  font-size: 12px;
+  color: #1e293b;
+  line-height: 1.45;
+}
+.fb-item-consolidated .fb-item-meta {
+  font-size: 10.5px;
+  color: #92400e;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+/* ── memory.md preview ── */
+.preview-actions {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 8px;
+}
+.preview-actions button {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  cursor: pointer;
+  color: #334155;
+}
+.preview-actions button:hover { background: #eef2ff; border-color: #c7d2fe; color: #4f46e5; }
+.preview-text {
+  width: 100%;
+  height: 220px;
+  font-family: 'SF Mono', Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  line-height: 1.45;
+  padding: 9px 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  resize: vertical;
+  background: #fafafa;
+  color: #334155;
+}
 </style>
 </head>
 <body>
@@ -142,7 +372,78 @@ body {
 
 <div class="domain-list" id="domain-list"></div>
 
+<!-- ── Flag a response ── -->
+<div class="fb-section">
+  <button class="fb-toggle" id="flag-toggle" type="button">
+    <span>Flag a response</span>
+    <span class="fb-caret">▾</span>
+  </button>
+  <div class="fb-body" id="flag-body" hidden>
+    <div class="flag-field">
+      <label class="flag-field-label" for="flag-domain">Domain this was about</label>
+      <select id="flag-domain"></select>
+    </div>
+
+    <div class="flag-field">
+      <span class="flag-field-label">What felt off?</span>
+      <div class="flag-radio-group" id="flag-misc-group"></div>
+    </div>
+
+    <div class="flag-field">
+      <label class="flag-field-label" for="flag-response">Paste the AI response</label>
+      <textarea id="flag-response" placeholder="Paste the response that felt miscalibrated…"></textarea>
+    </div>
+
+    <div class="flag-field">
+      <label class="flag-field-label" for="flag-notes">Notes (optional)</label>
+      <input type="text" id="flag-notes" placeholder="What did you actually want?">
+    </div>
+
+    <div class="flag-error" id="flag-error" hidden></div>
+    <div class="flag-ok" id="flag-ok" hidden></div>
+
+    <div class="flag-actions">
+      <button class="flag-btn flag-btn-ghost" id="flag-reset" type="button">Reset</button>
+      <button class="flag-btn flag-btn-primary" id="flag-submit" type="button">Submit flag</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Pending flags ── -->
+<div class="fb-section" id="pending-section" hidden>
+  <button class="fb-toggle" id="pending-toggle" type="button">
+    <span>Pending flags <span class="fb-count" id="pending-count">0</span></span>
+    <span class="fb-caret">▾</span>
+  </button>
+  <div class="fb-body" id="pending-body" hidden></div>
+</div>
+
+<!-- ── Consolidated patterns ── -->
+<div class="fb-section" id="consol-section" hidden>
+  <button class="fb-toggle" id="consol-toggle" type="button">
+    <span>Consolidated patterns <span class="fb-count" id="consol-count">0</span></span>
+    <span class="fb-caret">▾</span>
+  </button>
+  <div class="fb-body" id="consol-body" hidden></div>
+</div>
+
+<!-- ── Updated memory.md ── -->
+<div class="fb-section">
+  <button class="fb-toggle" id="preview-toggle" type="button">
+    <span>Updated memory.md</span>
+    <span class="fb-caret">▾</span>
+  </button>
+  <div class="fb-body" id="preview-body" hidden>
+    <div class="preview-actions">
+      <button id="preview-copy" type="button">Copy</button>
+      <button id="preview-download" type="button">Download</button>
+    </div>
+    <textarea class="preview-text" id="preview-text" readonly spellcheck="false"></textarea>
+  </div>
+</div>
+
 <script src="storage.js"></script>
+<script src="shared.js"></script>
 <script src="sidepanel.js"></script>
 </body>
 </html>

@@ -21,6 +21,9 @@ const BoundariesStorage = {
         y: Math.round(data.newChat.y * 1000) / 1000,
       } : null,
       sycophancy: typeof data.sycophancy === 'number' ? data.sycophancy : 50,
+      feedback: Array.isArray(data.feedback) ? data.feedback : [],
+      consolidatedFeedback: Array.isArray(data.consolidatedFeedback) ? data.consolidatedFeedback : [],
+      pendingSuggestions: Array.isArray(data.pendingSuggestions) ? data.pendingSuggestions : [],
     };
 
     if (typeof chrome !== 'undefined' && chrome.storage) {
