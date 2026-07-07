@@ -18,7 +18,8 @@ function p2n(px, py) {
     ny: Math.max(-1, Math.min(1, 1 - (py - PT) / CH * 2))
   };
 }
-// Q_INFO, Q_ORDER, EXAMPLE_PROMPT, EXAMPLE_RESPONSES, EXAMPLE_SHAPES, MISCALIBRATION_OPTIONS,
+// Q_INFO, Q_ORDER, EXAMPLE_PROMPT, EXAMPLE_RESPONSES, EXAMPLE_SHAPES, EXAMPLE_CONVERSATIONS,
+// DOMAIN_EXAMPLE_CONVERSATIONS, MISCALIBRATION_OPTIONS,
 // FEEDBACK_CONSOLIDATE_THRESHOLD, quadrant(), intensity(), miscalibrationOpt(),
 // miscalibrationLabel(), suggestPlacement(), consolidateFeedback(), adjustmentsSection(),
 // sycophancyDescriptor(), sycophancyScale(), intensityScale(), roleExamplesMarkdown(),
@@ -56,6 +57,8 @@ let state = {
   newChat: { ...NEW_CHAT_DOMAIN },
   selectedId: null,
   hoverPos: null,
+  exampleQuadrant: null,
+  exampleDomainId: null,
   sycophancy: 50,
   feedback: [],
   consolidatedFeedback: [],
@@ -298,6 +301,67 @@ function render() {
 }
 
 // ── Step 1 ───────────────────────────────────────
+function renderChatBubbles(turns, roleName) {
+  return (turns || []).map(t => `
+    <div class="qp-bubble qp-bubble-user">${t.user}</div>
+    <div class="qp-bubble qp-bubble-assistant"><span class="qp-bubble-role">${roleName}</span>${t.assistant}</div>
+  `).join('');
+}
+
+function renderQpChat(q, roleName) {
+  return renderChatBubbles(EXAMPLE_CONVERSATIONS[q], roleName);
+}
+
+// Domain-specific conversation, falling back to the generic quadrant example
+// when the placed domain (or custom domain) has no bespoke dialogue authored.
+function turnsForDomain(domainId, q) {
+  const byDomain = (typeof DOMAIN_EXAMPLE_CONVERSATIONS !== 'undefined' && DOMAIN_EXAMPLE_CONVERSATIONS[domainId]) || null;
+  return (byDomain && byDomain[q]) || EXAMPLE_CONVERSATIONS[q];
+}
+
+// Intensity is a separate, quadrant-agnostic axis (see intensityScale() in
+// shared.js: 0% = rebuff, 25% = guiding questions only, 50% = questions then
+// real output, 100% = full output). These bands select how much of the
+// authored conversation to reveal so the preview reflects both dimensions —
+// quadrant (voice) and intensity (how much of that voice's arc plays out —
+// not the actual model's dynamic judgment, just an illustrative proxy.
+function rebuffTurns(domainName) {
+  const label = domainName || 'this';
+  return [{
+    user: `Can you help me with ${label}?`,
+    assistant: `I'd rather not weigh in on ${label} — that's an area you've asked me to stay off-limits on.`
+  }];
+}
+
+function bandedExample(fullTurns, domainName, pct) {
+  if (pct === null || pct === undefined) {
+    return { turns: fullTurns, caption: '' };
+  }
+  if (pct <= 12) {
+    return {
+      turns: rebuffTurns(domainName),
+      caption: 'At this involvement level (≤12%), AI declines to engage — the quadrant role doesn\'t apply yet.'
+    };
+  }
+  if (pct <= 37) {
+    return {
+      turns: fullTurns.slice(0, 1),
+      caption: `Showing 1 of ${fullTurns.length} turns — at this involvement level AI only asks guiding questions, never a direct answer.`
+    };
+  }
+  if (pct <= 75) {
+    const n = Math.max(1, fullTurns.length - 1);
+    return {
+      turns: fullTurns.slice(0, n),
+      caption: `Showing ${n} of ${fullTurns.length} turns — AI asks questions first; real output is just starting to emerge.`
+    };
+  }
+  return {
+    turns: fullTurns,
+    caption: 'Full conversation shown — AI generates the complete output at this involvement level.'
+  };
+}
+
 function renderStep1() {
   const byQ = {};
   Q_ORDER.forEach(q => { byQ[q] = []; });
@@ -346,10 +410,8 @@ function renderStep1() {
           <span class="toggle-caret">▸</span> Show example
         </button>
         <div class="qp-example" id="qp-ex-pa" hidden>
-          <div class="qp-example-label">User asks:</div>
-          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
-          <div class="qp-example-label">Co-pilot replies:</div>
-          <div class="qp-example-response">${EXAMPLE_RESPONSES['pro-a']}</div>
+          <div class="qp-example-label">Example conversation</div>
+          <div class="qp-chat">${renderQpChat('pro-a', 'Co-pilot')}</div>
         </div>
       </div>
       <div class="qp-cell qp-xa">
@@ -360,10 +422,8 @@ function renderStep1() {
           <span class="toggle-caret">▸</span> Show example
         </button>
         <div class="qp-example" id="qp-ex-xa" hidden>
-          <div class="qp-example-label">User asks:</div>
-          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
-          <div class="qp-example-label">Coach replies:</div>
-          <div class="qp-example-response">${EXAMPLE_RESPONSES['per-a']}</div>
+          <div class="qp-example-label">Example conversation</div>
+          <div class="qp-chat">${renderQpChat('per-a', 'Coach')}</div>
         </div>
       </div>
       <div class="qp-cell qp-pp">
@@ -374,10 +434,8 @@ function renderStep1() {
           <span class="toggle-caret">▸</span> Show example
         </button>
         <div class="qp-example" id="qp-ex-pp" hidden>
-          <div class="qp-example-label">User asks:</div>
-          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
-          <div class="qp-example-label">Researcher replies:</div>
-          <div class="qp-example-response">${EXAMPLE_RESPONSES['pro-p']}</div>
+          <div class="qp-example-label">Example conversation</div>
+          <div class="qp-chat">${renderQpChat('pro-p', 'Researcher')}</div>
         </div>
       </div>
       <div class="qp-cell qp-xp">
@@ -388,10 +446,8 @@ function renderStep1() {
           <span class="toggle-caret">▸</span> Show example
         </button>
         <div class="qp-example" id="qp-ex-xp" hidden>
-          <div class="qp-example-label">User asks:</div>
-          <div class="qp-example-prompt">"${EXAMPLE_PROMPT}"</div>
-          <div class="qp-example-label">Mirror replies:</div>
-          <div class="qp-example-response">${EXAMPLE_RESPONSES['per-p']}</div>
+          <div class="qp-example-label">Example conversation</div>
+          <div class="qp-chat">${renderQpChat('per-p', 'Mirror')}</div>
         </div>
       </div>
     </div>
@@ -479,8 +535,32 @@ function renderStep2() {
         <span style="cursor:pointer;text-decoration:underline" data-action="unplace" data-id="new-chat">remove</span>
       </span>`;
 
+  const exQ       = state.exampleQuadrant;
+  const exInfo    = exQ ? Q_INFO[exQ] : null;
+  const exDomain  = state.exampleDomainId ? allDoms.find(d => d.id === state.exampleDomainId) : null;
+  const exFullTurns = exQ ? turnsForDomain(state.exampleDomainId, exQ) : null;
+  const exPct     = (exDomain && exDomain.x !== null) ? intensity(exDomain.x, exDomain.y) : null;
+  const exBanded  = exFullTurns ? bandedExample(exFullTurns, exDomain ? exDomain.name : null, exPct) : null;
+
+  const plotWrapHtml = `
+    <div class="plot-wrap${selDom ? ' plot-cursor-crosshair' : ''}" id="plot-wrap">
+      ${makeSVG()}
+      <div class="chips-layer" id="chips-layer">
+        ${placedChips}
+      </div>
+      <div id="hover-preview" style="display:none;pointer-events:none;position:absolute;top:0;left:0;width:100%;height:100%"></div>
+    </div>`;
+
+  const sidePanelHtml = exInfo ? `
+    <div class="qp-side-panel">
+      <div class="qp-side-panel-role">${exInfo.role}</div>
+      <div class="qp-side-panel-label">${exDomain ? exDomain.name + ' · ' : ''}${exInfo.label}${exPct !== null ? ' · ' + exPct + '%' : ''}</div>
+      <div class="qp-chat">${renderChatBubbles(exBanded.turns, exInfo.role)}</div>
+      <div class="qp-side-panel-caption">${exBanded.caption}</div>
+    </div>` : '';
+
   return `
-<div class="card" style="max-width:620px">
+<div class="card" style="max-width:${exInfo ? '940px' : '620px'}">
   <div class="progress-track"><div class="progress-fill" style="width:66%"></div></div>
   <div class="step-meta">
     <span class="step-badge">Mapping</span>
@@ -491,12 +571,9 @@ function renderStep2() {
 
   <div class="plot-body">
     <div class="plot-hint${selDom ? ' active-hint' : ''}" id="plot-hint">${hint}</div>
-    <div class="plot-wrap${selDom ? ' plot-cursor-crosshair' : ''}" id="plot-wrap">
-      ${makeSVG()}
-      <div class="chips-layer" id="chips-layer">
-        ${placedChips}
-      </div>
-      <div id="hover-preview" style="display:none;pointer-events:none;position:absolute;top:0;left:0;width:100%;height:100%"></div>
+    <div class="plot-row${exInfo ? ' has-panel' : ''}">
+      ${plotWrapHtml}
+      ${sidePanelHtml}
     </div>
   </div>
 
@@ -562,6 +639,8 @@ function bindPlot() {
         const dom = state.domains.find(d => d.id === state.selectedId);
         if (dom) { dom.x = nx; dom.y = ny; }
       }
+      state.exampleQuadrant = quadrant(nx, ny);
+      state.exampleDomainId = state.selectedId;
       state.selectedId = null;
       state.hoverPos = null;
       persistState();
